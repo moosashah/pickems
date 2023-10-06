@@ -52,6 +52,16 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
       };
       return JSON.stringify(res);
     }
+    if (data.name === "foo") {
+      console.log("foo command");
+      const res = {
+        type: 4,
+        data: {
+          content: "bar!",
+        },
+      };
+      return JSON.stringify(res);
+    }
   }
   return {
     statusCode: 404,

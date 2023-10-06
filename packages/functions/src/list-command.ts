@@ -1,25 +1,18 @@
+import { Handler } from "aws-lambda";
 import { request } from "https";
 import { Config } from "sst/node/config";
 
-export const handler = async () => {
+export const handler: Handler = async () => {
   const url = (app_id: string, guild_id: string) =>
     `https://discord.com/api/v10/applications/${app_id}/guilds/${guild_id}/commands`;
 
-  const payload = {
-    name: "ping",
-    description: "Replises with pong",
-    type: 1,
-  };
-
-  // For authorization, you can use either your bot token
   const headers = {
-    Authorization: `Bot ${Config.DISCORD_KEY}`, // OR use "Bearer <my_credentials_token>" for client credentials
+    Authorization: `Bot ${Config.DISCORD_KEY}`,
     "Content-Type": "application/json",
-    "Content-Length": Buffer.from(JSON.stringify(payload)).length,
   };
 
   const options = {
-    method: "POST",
+    method: "GET",
     headers: headers,
   };
 
@@ -45,7 +38,6 @@ export const handler = async () => {
       reject(error);
     });
 
-    req.write(JSON.stringify(payload));
     req.end();
   });
 };
