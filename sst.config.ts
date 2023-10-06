@@ -1,6 +1,6 @@
 import { SSTConfig } from "sst";
+import { ExampleStack } from "./stacks/ExampleStack";
 import { CommandsStack } from "./stacks/CommandsStack";
-import { InteractionsStack } from "./stacks/InteractionsStack";
 
 export default {
   config(_input) {
@@ -10,6 +10,6 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(InteractionsStack).stack(CommandsStack)
+    app.stack(ExampleStack).stack(CommandsStack)
   }
 } satisfies SSTConfig;

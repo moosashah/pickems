@@ -1,9 +1,9 @@
 import { Api, Config, StackContext } from "sst/constructs";
 
-export function InteractionsStack({ stack }: StackContext) {
+export function ExampleStack({ stack }: StackContext) {
   const DISCORD_KEY = new Config.Secret(stack, "DISCORD_KEY");
   const PUBLIC_KEY = new Config.Secret(stack, "PUBLIC_KEY");
-  const api = new Api(stack, "Interactions", {
+  const api = new Api(stack, "test", {
     routes: {
       "POST /interactions": "packages/functions/src/interactions.main",
     },
