@@ -1,5 +1,5 @@
 import { Api, Config, StackContext, use } from "sst/constructs";
-import { ExampleStack } from "./ExampleStack";
+import { InteractionsStack } from "./InteractionsStack";
 
 export function CommandsStack({ stack }: StackContext) {
   const APPLICATION_ID = new Config.Secret(stack, "APPLICATION_ID");
@@ -12,7 +12,7 @@ export function CommandsStack({ stack }: StackContext) {
       "GET /:id": "packages/functions/src/get-command.handler",
     },
   });
-  api.bind([APPLICATION_ID, GUILD_ID, use(ExampleStack).DISCORD_KEY]);
+  api.bind([APPLICATION_ID, GUILD_ID, use(InteractionsStack).DISCORD_KEY]);
   stack.addOutputs({
     ApiEndpoint: `${api.url}/commands`,
   });
