@@ -1,8 +1,8 @@
-import { Handler } from "aws-lambda";
 import { Config } from "sst/node/config";
 import nacl from "tweetnacl";
 
-export const handler: Handler = async (event) => {
+export const handler = async (event) => {
+  console.log("auth function");
   const strBody = event.body; // should be string, for successful sign
 
   // Checking signature (requirement 1.)
@@ -13,6 +13,13 @@ export const handler: Handler = async (event) => {
   const timestamp =
     event.headers["x-signature-timestamp"] ||
     event.headers["X-Signature-Timestamp"];
+
+  if (!timestamp || !signature || !strBody) {
+    return {
+      statusCode: 401,
+      body: JSON.stringify("invalid request signature"),
+    };
+  }
 
   const isVerified = nacl.sign.detached.verify(
     Buffer.from(timestamp + strBody),
@@ -35,4 +42,17 @@ export const handler: Handler = async (event) => {
       body: JSON.stringify({ type: 1 }),
     };
   }
+  return {
+    principalId: "user",
+    policyDocument: {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Action: "execute-api:Invoke",
+          Effect: "Allow",
+          Resource: "*",
+        },
+      ],
+    },
+  };
 };
