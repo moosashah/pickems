@@ -39,7 +39,18 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
     };
   }
   console.log("passed auth");
+  console.log({ data });
+  if (type === InteractionType.APPLICATION_COMMAND) {
+    console.log("application command");
+    if (data.name === "ping") {
+      console.log("ping command");
+      const res = {
+        type: 4,
+        data: {
+          content: "Pong!",
+        },
       };
+      return JSON.stringify(res);
     }
   }
   return {
