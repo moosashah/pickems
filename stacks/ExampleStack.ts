@@ -1,36 +1,29 @@
-import { Api, Config, StackContext, Function } from "sst/constructs";
+import { Api, Config, StackContext /* , Function */ } from "sst/constructs";
 
 export function ExampleStack({ stack }: StackContext) {
   const DISCORD_KEY = new Config.Secret(stack, "DISCORD_KEY");
   const PUBLIC_KEY = new Config.Secret(stack, "PUBLIC_KEY");
+  const APPLICATION_ID = new Config.Secret(stack, "APPLICATION_ID");
+  const GUILD_ID = new Config.Secret(stack, "GUILD_ID");
   const api = new Api(stack, "test", {
-    authorizers: {
-      discordAuth: {
-        type: "lambda",
-        function: new Function(stack, "DiscordAuth", {
-          handler: "packages/functions/src/discordAuth.handler",
-        }),
-      },
-    },
-    defaults: {
-      authorizer: "discordAuth",
-    },
+    // authorizers: {
+    //   discordAuth: {
+    //     type: "lambda",
+    //     function: new Function(stack, "DiscordAuth", {
+    //       handler: "packages/functions/src/discordAuth.handler",
+    //     }),
+    //   },
+    // },
+    // defaults: {
+    //   authorizer: "none",
+    // },
     routes: {
-      "GET /ezauth": {
-        function: "packages/functions/src/foo.main",
-        authorizer: "none",
-      },
-      "POST /interactions": {
-        function: "packages/functions/src/interactions.main",
-        authorizer: "discordAuth",
-      },
-      "GET /public": {
-        function: "packages/functions/src/bar.main",
-        authorizer: "none",
-      },
+      "POST /interactions": "packages/functions/src/interactions.main",
+      "POST /register-command":
+        "packages/functions/src/register-command.handler",
     },
   });
-  api.bind([DISCORD_KEY, PUBLIC_KEY]);
+  api.bind([DISCORD_KEY, PUBLIC_KEY, APPLICATION_ID, GUILD_ID]);
   stack.addOutputs({
     ApiEndpoint: api.url,
   });
