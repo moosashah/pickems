@@ -1,4 +1,4 @@
-import { Api, Config, StackContext /* , Function */ } from "sst/constructs";
+import { Api, Config, StackContext } from "sst/constructs";
 
 export function ExampleStack({ stack }: StackContext) {
   const DISCORD_KEY = new Config.Secret(stack, "DISCORD_KEY");
@@ -6,17 +6,6 @@ export function ExampleStack({ stack }: StackContext) {
   const APPLICATION_ID = new Config.Secret(stack, "APPLICATION_ID");
   const GUILD_ID = new Config.Secret(stack, "GUILD_ID");
   const api = new Api(stack, "test", {
-    // authorizers: {
-    //   discordAuth: {
-    //     type: "lambda",
-    //     function: new Function(stack, "DiscordAuth", {
-    //       handler: "packages/functions/src/discordAuth.handler",
-    //     }),
-    //   },
-    // },
-    // defaults: {
-    //   authorizer: "none",
-    // },
     routes: {
       "POST /interactions": "packages/functions/src/interactions.main",
       "POST /register-command":
