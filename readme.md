@@ -8,5 +8,8 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [ ] Cancel match
 - [x] Pick match winner
 - [x] assigns points
-- [ ] list my points
+- [x] list my points
+- [ ] Add electroDB
+- [ ] Leaderboards
+- [ ] Add ranking
 - [ ] dashboard to show live votes w/timer

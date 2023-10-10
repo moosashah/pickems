@@ -4,6 +4,7 @@ import {
   StackContext,
   Table,
   Queue,
+  Function,
   toCdkDuration,
 } from "sst/constructs";
 
@@ -64,10 +65,15 @@ export function InteractionsStack({ stack }: StackContext) {
     },
   });
 
+  const getPointsFunction = new Function(stack, "GetPointsFunction", {
+    handler: "packages/functions/src/get-points.main",
+    bind: [usersTbl],
+  });
+
   const api = new Api(stack, "Interactions", {
     defaults: {
       function: {
-        bind: [table, pointsQueue, usersTbl, votesQueue],
+        bind: [table, pointsQueue, usersTbl, votesQueue, getPointsFunction],
       },
     },
     routes: {
