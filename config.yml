@@ -1,0 +1,34 @@
+config:
+  target: 'https://qiuum9de3g.execute-api.us-east-1.amazonaws.com'
+  phases:
+    - duration: 60 # 2 minutes
+      arrivalRate: 100 # This will send about 5000 requests over 2 minutes (42*120 = 5040)
+    - duration: 60 # 2 minutes
+      arrivalRate: 500 # This will send about 5000 requests over 2 minutes (42*120 = 5040)
+    - duration: 60 # 2 minutes
+      arrivalRate: 250 # This will send about 5000 requests over 2 minutes (42*120 = 5040)
+    - duration: 60 # 2 minutes
+      arrivalRate: 100 # This will send about 5000 requests over 2 minutes (42*120 = 5040)
+    - duration: 60 # 2 minutes
+      arrivalRate: 50 # This will send about 5000 requests over 2 minutes (42*120 = 5040)
+  payload:
+    path: "payload.csv"
+    fields:
+      - "application_id"
+      - "token"
+      - "user_id"
+      - "custom_id"
+
+scenarios:
+  - flow:
+      - post:
+          url: "/interactions" 
+          json:
+            type: 3
+            data:
+              custom_id: "{{ custom_id }}"
+            application_id: "{{ application_id }}"
+            token: "{{ token }}"
+            member:
+              user:
+                id: "{{ user_id }}"
