@@ -1,5 +1,4 @@
 import { SSTConfig } from "sst";
-import { CommandsStack } from "./stacks/CommandsStack";
 import { InteractionsStack } from "./stacks/InteractionsStack";
 
 export default {
@@ -10,6 +9,9 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(InteractionsStack).stack(CommandsStack)
+    app.stack(InteractionsStack)
+        if (app.stage !== 'prod') {
+            app.setDefaultRemovalPolicy("destroy")
+        }
   }
 } satisfies SSTConfig;

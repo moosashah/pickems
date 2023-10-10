@@ -11,8 +11,7 @@ interface RegisterCommandEvent {
 }
 
 export const handler: Handler<RegisterCommandEvent> = async (event) => {
-  const url = (app_id: string, guild_id: string) =>
-    `https://discord.com/api/v10/applications/${app_id}/guilds/${guild_id}/commands`;
+  const url = `https://discord.com/api/v10/applications/${Config.APPLICATION_ID}/guilds/${Config.GUILD_ID}/commands`;
 
   const payload = event.payload;
 
@@ -28,22 +27,18 @@ export const handler: Handler<RegisterCommandEvent> = async (event) => {
   };
 
   return new Promise((resolve, reject) => {
-    const req = request(
-      url(Config.APPLICATION_ID, Config.GUILD_ID),
-      options,
-      (res) => {
-        let data = "";
-        res.on("data", (chunk) => {
-          data += chunk;
+    const req = request(url, options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => {
+        data += chunk;
+      });
+      res.on("end", () => {
+        resolve({
+          statusCode: res.statusCode,
+          body: data,
         });
-        res.on("end", () => {
-          resolve({
-            statusCode: res.statusCode,
-            body: data,
-          });
-        });
-      }
-    );
+      });
+    });
 
     req.on("error", (error) => {
       reject(error);
