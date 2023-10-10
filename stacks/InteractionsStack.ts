@@ -9,7 +9,7 @@ import {
 } from "sst/constructs";
 
 export function InteractionsStack({ stack }: StackContext) {
-  const DISCORD_KEY = new Config.Secret(stack, "DISCORD_KEY");
+  const BOT_TOKEN = new Config.Secret(stack, "BOT_TOKEN");
   const PUBLIC_KEY = new Config.Secret(stack, "PUBLIC_KEY");
 
   const usersTbl = new Table(stack, "Users", {
@@ -67,7 +67,7 @@ export function InteractionsStack({ stack }: StackContext) {
 
   const getPointsFunction = new Function(stack, "GetPointsFunction", {
     handler: "packages/functions/src/get-points.main",
-    bind: [usersTbl],
+    bind: [usersTbl, BOT_TOKEN],
   });
 
   const api = new Api(stack, "Interactions", {
@@ -83,11 +83,11 @@ export function InteractionsStack({ stack }: StackContext) {
     },
   });
 
-  api.bind([DISCORD_KEY, PUBLIC_KEY]);
+  api.bind([BOT_TOKEN, PUBLIC_KEY]);
   stack.addOutputs({
     ApiEndpoint: api.url,
   });
   return {
-    DISCORD_KEY,
+    BOT_TOKEN,
   };
 }

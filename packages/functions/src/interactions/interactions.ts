@@ -106,6 +106,10 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
           Payload: JSON.stringify(postData),
         })
         .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Getting your points...", flags: 64 },
+      });
     }
 
     return JSON.stringify({

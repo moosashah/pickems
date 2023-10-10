@@ -1,6 +1,7 @@
 import { Table } from "sst/node/table";
 import AWS from "aws-sdk";
 import fetch from "node-fetch";
+import { Config } from "sst/node/config";
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -30,8 +31,7 @@ const reply = async (content: string, id: string, token: string) => {
     method: "PATCH",
     headers: {
       "Content-type": "application/json",
-      Authorization:
-        "Bot MTE1OTQwOTg3Njc4NzgwMjIzMw.Gpk4FZ.7MgX8NveKybGzpyFZpliLC732o9VpH6O4yFLW0",
+      Authorization: "Bot " + Config.BOT_TOKEN,
     },
     body: JSON.stringify({
       type: 4,

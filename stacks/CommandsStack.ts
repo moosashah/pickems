@@ -13,7 +13,7 @@ export function CommandsStack({ stack }: StackContext) {
       "GET /:id": "packages/functions/src/commands/get-command.handler",
     },
   });
-  api.bind([APPLICATION_ID, GUILD_ID, use(InteractionsStack).DISCORD_KEY]);
+  api.bind([APPLICATION_ID, GUILD_ID, use(InteractionsStack).BOT_TOKEN]);
   stack.addOutputs({
     ApiEndpoint: `${api.url}/commands`,
   });
