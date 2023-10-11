@@ -1,91 +1,56 @@
 import { SQSEvent } from "aws-lambda";
-import { Table } from "sst/node/table";
-import AWS from "aws-sdk";
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+import { User } from "@pickems/core/database/user";
 
 interface UsersRes {
-  id: string;
+  user_id: string;
   score: number;
 }
 
-const getUsersPoints = async (tableName: string, keys: { id: string }[]) => {
-  const res = await dynamoDb
-    .batchGet({
-      RequestItems: {
-        [tableName]: {
-          Keys: keys,
-        },
-      },
-    })
-    .promise();
+interface Key {
+  user_id: string;
+}
 
-  return res.Responses?.[tableName] || [];
+const getUsersPoints = async (keys: Key[]) => {
+  const r = await User.batchGet(keys);
+  return r.data;
 };
 
-const batchCreateUsers = async (records: any[], tableName: string) => {
-  return await dynamoDb
-    .batchWrite({
-      RequestItems: {
-        [tableName]: records.map((rec) => {
-          const parsedBody = JSON.parse(rec.body);
-          return {
-            PutRequest: {
-              Item: {
-                id: parsedBody.id,
-                score: 1,
-              },
-            },
-          };
-        }),
-      },
-    })
-    .promise();
+const batchUpdatePoints = async (records: UsersRes[]) => {
+  const keys = records.map((r) => ({
+    user_id: r.user_id,
+    score: r.score + 1,
+  }));
+  return await User.batchWrite(keys);
 };
 
-const batchUpdatePoints = async (
-  batchGetRes: UsersRes[],
-  tableName: string
-) => {
-  const batchWriteParams = {
-    RequestItems: {
-      [tableName]: batchGetRes.map((rec) => {
-        return {
-          PutRequest: {
-            Item: {
-              id: rec.id,
-              score: rec.score + 1,
-            },
-          },
-        };
-      }),
-    },
-  };
-
-  return await dynamoDb.batchWrite(batchWriteParams).promise();
+const batchCreateUsers = async (batchGetRes: Key[]) => {
+  const batchWriteRecords = batchGetRes.map((rec) => ({
+    user_id: rec.user_id,
+    score: 1,
+  }));
+  return await User.batchWrite(batchWriteRecords);
 };
+
 export const main = async (event: SQSEvent) => {
   const records: any[] = event.Records;
   const keys = records.map((r) => {
-    const parsedId = JSON.parse(r.body).id;
     return {
-      id: parsedId,
+      user_id: JSON.parse(r.body).user_id,
     };
   });
 
-  const tbl = Table.Users.tableName;
-
   try {
-    const batchGetRes = (await getUsersPoints(tbl, keys)) as UsersRes[] | [];
+    const batchGetRes = await getUsersPoints(keys);
 
     if (!batchGetRes.length) {
-      await batchCreateUsers(records, tbl);
+      await batchCreateUsers(keys);
       console.log(`Added ${keys.length} new users to database`);
       return {
         status: 200,
         message: `Added ${keys.length} new users to database`,
       };
     } else {
-      await batchUpdatePoints(batchGetRes, tbl);
+      await batchUpdatePoints(batchGetRes);
       console.log(`Updated scores for ${batchGetRes.length} people`);
       return {
         status: 200,

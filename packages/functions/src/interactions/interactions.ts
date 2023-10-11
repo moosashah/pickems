@@ -9,10 +9,11 @@ const sqs = new AWS.SQS();
 const lambda = new AWS.Lambda();
 
 interface Item {
-  id: string;
+  appId: string;
   token: string;
   userId: string;
   pick: "red_id" | "blue_id";
+  gameId: string;
 }
 
 const sendToSQS = async (item: Item) => {
@@ -79,11 +80,12 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
-    const postData = {
-      id: body.application_id,
+    const postData: Item = {
+      appId: body.application_id,
       token: body.token,
       userId: body.member.user.id,
       pick: data.custom_id,
+      gameId: "red-vs-blue",
     };
     if (data.custom_id === "red_id" || data.custom_id === "blue_id") {
       try {
@@ -94,7 +96,6 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
       }
     }
     if (data.custom_id === "point_check") {
-      console.log({ data });
       lambda
         .invoke({
           FunctionName: Function.GetPointsFunction.functionName,

@@ -28,6 +28,16 @@ export function InteractionsStack({ stack }: StackContext) {
     },
   });
 
+  const getPointsFunction = new Function(stack, "GetPointsFunction", {
+    handler: "packages/functions/src/get-points.main",
+    bind: [table, BOT_TOKEN],
+  });
+
+  const updateMessageFunction = new Function(stack, "UpdateMessage", {
+    handler: "packages/functions/src/update-message.main",
+    bind: [BOT_TOKEN],
+  });
+
   const pointsQueue = new Queue(stack, "PointsQueue", {
     consumer: {
       function: {
@@ -45,22 +55,17 @@ export function InteractionsStack({ stack }: StackContext) {
   const votesQueue = new Queue(stack, "VotesQueue", {
     consumer: {
       function: {
-        handler: "packages/functions/src/interactions/followUp.main",
-        bind: [table],
+        handler: "packages/functions/src/interactions/votes-consumer.main",
+        bind: [table, updateMessageFunction],
       },
       cdk: {
         eventSource: {
-          batchSize: 25,
+          // batchSize: 25,
           maxConcurrency: 500,
-          maxBatchingWindow: toCdkDuration("30 seconds"),
+          // maxBatchingWindow: toCdkDuration("30 seconds"),
         },
       },
     },
-  });
-
-  const getPointsFunction = new Function(stack, "GetPointsFunction", {
-    handler: "packages/functions/src/get-points.main",
-    bind: [table, BOT_TOKEN],
   });
 
   const api = new Api(stack, "Interactions", {

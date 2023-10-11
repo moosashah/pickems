@@ -11,17 +11,17 @@ export const VoteEntity = new Entity(
       service: "scratch",
     },
     attributes: {
-      userId: {
+      user_id: {
         type: "string",
         required: true,
         readOnly: true,
       },
-      gameId: {
+      game_id: {
         type: "string",
         required: true,
         readOnly: true,
       },
-      pickId: {
+      pick_id: {
         type: "string",
         required: true,
       },
@@ -30,18 +30,18 @@ export const VoteEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["userId"],
+          composite: ["user_id"],
         },
         sk: {
           field: "sk",
-          composite: ["gameId"],
+          composite: ["game_id"],
         },
       },
       byPick: {
         index: "gsi1",
         pk: {
           field: "gsi1pk",
-          composite: ["pickId"],
+          composite: ["pick_id", "game_id"],
         },
         sk: {
           field: "gsi1sk",
@@ -55,27 +55,10 @@ export const VoteEntity = new Entity(
 
 export type VoteEntityType = EntityItem<typeof VoteEntity>;
 
-export const upsert = async ({ userId, gameId, pickId }: VoteEntityType) => {
-  return await VoteEntity.upsert({
-    userId,
-    gameId,
-    pickId,
-  }).go();
-};
-
 export const batchWrite = async (records: VoteEntityType[]) => {
   return await VoteEntity.put(records).go();
 };
 
-// const table = new Table(stack, "Votes", {
-//   fields: {
-//     id: "string",
-//     pick: "string",
-//   },
-//   primaryIndex: {
-//     partitionKey: "id",
-//   },
-//   globalIndexes: {
-//     GSI1: { partitionKey: "pick" },
-//   },
-// });
+export const getByPick = async (key: { pick_id: string; game_id: string }) => {
+  return await VoteEntity.query.byPick(key).go();
+};

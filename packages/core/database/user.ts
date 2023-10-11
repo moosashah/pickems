@@ -3,45 +3,53 @@ import { Dynamo } from "./database";
 
 export * as User from "./user";
 
-export const UserEntity = new Entity({
-  model: {
-    version: "1",
-    entity: "User",
-    service: "scratch",
-  },
-  attributes: {
-    userId: {
-      type: "string",
-      required: true,
-      readOnly: true,
+const UserEntity = new Entity(
+  {
+    model: {
+      version: "1",
+      entity: "User",
+      service: "scratch",
     },
-    score: {
-      type: "number",
-      required: true,
+    attributes: {
+      user_id: {
+        type: "string",
+        required: true,
+        readOnly: true,
+      },
+      score: {
+        type: "number",
+        required: true,
+      },
+      ranking: {
+        type: "number",
+      },
     },
-    ranking: {
-      type: "number",
-    },
-  },
-  indexes: {
-    primary: {
-      pk: {
-        field: "pk",
-        composite: ["userId"],
+    indexes: {
+      primary: {
+        pk: {
+          field: "pk",
+          composite: ["user_id"],
+        },
+        sk: {
+          field: "sk",
+          composite: [],
+        },
       },
     },
   },
-  Configuration: Dynamo.Config,
-});
+  Dynamo.Config
+);
 
-export type UserEntityType = EntityItem<typeof UserEntity>;
+type UserEntityType = EntityItem<typeof UserEntity>;
 
-// const usersTbl = new Table(stack, "Users", {
-//   fields: {
-//     id: "string",
-//     score: "number",
-//   },
-//   primaryIndex: {
-//     partitionKey: "id",
-//   },
-// });
+export const batchGet = async (ids: { user_id: string }[]) => {
+  return await UserEntity.get(ids).go();
+};
+
+export const get = async (id: { user_id: string }) => {
+  return await UserEntity.query.primary(id).go();
+};
+
+export const batchWrite = async (records: UserEntityType[]) => {
+  return await UserEntity.put(records).go();
+};

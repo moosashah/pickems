@@ -1,15 +1,10 @@
 import fetch from "node-fetch";
 import { Config } from "sst/node/config";
-import { User } from "@pickems/core/database/user";
 
-const getUserPoints = async (id: string) => {
-  return (await User.get({ user_id: id })).data[0];
-};
-
-interface funcBody {
-  userId: string;
+interface FuncBody {
   token: string;
-  appId: string;
+  app_id: string;
+  message: string;
 }
 
 const reply = async (content: string, id: string, token: string) => {
@@ -26,7 +21,6 @@ const reply = async (content: string, id: string, token: string) => {
       content,
     }),
   };
-
   try {
     return await (await fetch(url, params)).json();
   } catch (err) {
@@ -35,16 +29,6 @@ const reply = async (content: string, id: string, token: string) => {
   }
 };
 
-export const main = async (event: funcBody) => {
-  const points = await getUserPoints(event.userId);
-
-  if (!points) {
-    return await reply("You have no points", event.appId, event.token);
-  } else {
-    return await reply(
-      `You have ${points.score} points`,
-      event.appId,
-      event.token
-    );
-  }
+export const main = async (event: FuncBody) => {
+  return await reply(event.message, event.app_id, event.token);
 };

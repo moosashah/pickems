@@ -1,19 +1,26 @@
-import { Table } from "sst/node/table";
 import { Queue } from "sst/node/queue";
 import AWS from "aws-sdk";
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+import { Vote } from "@pickems/core/database/vote";
+import { APIGatewayEvent } from "aws-lambda";
 const sqs = new AWS.SQS();
 
-const sendToSQS = async (items) => {
+const sendToSQS = async (
+  items: {
+    user_id: string;
+    game_id: string;
+    pick_id: string;
+  }[]
+) => {
   const entries = items.map((item, index) => {
     const i = {
       Id: index.toString(),
       MessageBody: JSON.stringify(item),
-      MessageGroupId: item.id,
-      MessageDeduplicationId: item.id,
+      MessageGroupId: item.user_id,
+      MessageDeduplicationId: item.user_id,
     };
     return i;
   });
+
   const params: AWS.SQS.SendMessageBatchRequest = {
     QueueUrl: Queue.PointsQueue.queueUrl,
     Entries: entries,
@@ -27,29 +34,19 @@ const sendToSQS = async (items) => {
   }
 };
 
-export const main = async (event) => {
-  const { pick_id } = JSON.parse(event.body!);
-
-  const params: AWS.DynamoDB.DocumentClient.QueryInput = {
-    TableName: Table.Votes.tableName,
-    IndexName: "GSI1",
-    KeyConditionExpression: "pick = :pick",
-    ExpressionAttributeValues: {
-      ":pick": pick_id,
-    },
-  };
-
+export const main = async (event: APIGatewayEvent) => {
+  const { pick_id, game_id } = JSON.parse(event.body!);
   try {
-    const res = await dynamoDb.query(params).promise();
+    const res = await Vote.getByPick({ pick_id, game_id });
 
-    if (res.Items?.length) {
-      for (let i = 0; i < res.Items.length; i += 10) {
-        const batch = res.Items.slice(i, i + 10);
+    if (res.data.length) {
+      for (let i = 0; i < res.data.length; i += 10) {
+        const batch = res.data.slice(i, i + 10);
         sendToSQS(batch);
       }
       return JSON.stringify({
         status: 200,
-        message: `Awarding points to ${res.Items?.length} people`,
+        message: `Awarding points to ${res.data?.length} people`,
       });
     }
     return JSON.stringify({
