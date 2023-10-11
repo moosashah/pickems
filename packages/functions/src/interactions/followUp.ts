@@ -1,14 +1,18 @@
-import { Table } from "sst/node/table";
-import AWS from "aws-sdk";
 import { SQSEvent } from "aws-lambda";
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient();
+import { Vote } from "@pickems/core/database/vote";
 
 export const main = async (event: SQSEvent) => {
-  const data = event.Records.map((r) => JSON.parse(r.body));
+  const data = event.Records.map((r) => {
+    const body = JSON.parse(r.body);
+    return {
+      userId: body.userId,
+      gameId: "red-vs-blue",
+      pickId: body.pick,
+    };
+  });
 
-  const seen = new Set();
   const uniqueData = data.filter(({ userId }) => {
+    const seen = new Set();
     if (seen.has(userId)) {
       return false;
     }
@@ -16,23 +20,11 @@ export const main = async (event: SQSEvent) => {
     return true;
   });
 
-  const writeReqs = uniqueData.map(({ userId, pick }) => ({
-    PutRequest: {
-      Item: {
-        id: userId,
-        pick,
-      },
-    },
-  }));
+  console.log({ uniqueData });
 
-  const params = {
-    RequestItems: {
-      [Table.Votes.tableName]: writeReqs,
-    },
-  };
   try {
-    await dynamoDb.batchWrite(params).promise();
-    console.log(`Saved ${data.length} recorded to db`);
+    await Vote.batchWrite(uniqueData);
+    console.log(`Saved ${uniqueData.length} recorded to db`);
     return {
       status: 200,
       message: `Saved ${data.length} recorded to db`,

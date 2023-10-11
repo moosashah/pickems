@@ -12,26 +12,19 @@ export function InteractionsStack({ stack }: StackContext) {
   const BOT_TOKEN = new Config.Secret(stack, "BOT_TOKEN");
   const PUBLIC_KEY = new Config.Secret(stack, "PUBLIC_KEY");
 
-  const usersTbl = new Table(stack, "Users", {
+  const table = new Table(stack, "db", {
     fields: {
-      id: "string",
-      score: "number",
+      pk: "string",
+      sk: "string",
+      gsi1pk: "string",
+      gsi1sk: "string",
     },
     primaryIndex: {
-      partitionKey: "id",
-    },
-  });
-
-  const table = new Table(stack, "Votes", {
-    fields: {
-      id: "string",
-      pick: "string",
-    },
-    primaryIndex: {
-      partitionKey: "id",
+      partitionKey: "pk",
+      sortKey: "sk",
     },
     globalIndexes: {
-      GSI1: { partitionKey: "pick" },
+      gsi1: { partitionKey: "gsi1pk", sortKey: "gsi1sk" },
     },
   });
 
@@ -39,7 +32,7 @@ export function InteractionsStack({ stack }: StackContext) {
     consumer: {
       function: {
         handler: "packages/functions/src/interactions/points-consumer.main",
-        bind: [usersTbl],
+        bind: [table],
       },
     },
     cdk: {
@@ -67,13 +60,13 @@ export function InteractionsStack({ stack }: StackContext) {
 
   const getPointsFunction = new Function(stack, "GetPointsFunction", {
     handler: "packages/functions/src/get-points.main",
-    bind: [usersTbl, BOT_TOKEN],
+    bind: [table, BOT_TOKEN],
   });
 
   const api = new Api(stack, "Interactions", {
     defaults: {
       function: {
-        bind: [table, pointsQueue, usersTbl, votesQueue, getPointsFunction],
+        bind: [table, pointsQueue, votesQueue, getPointsFunction],
       },
     },
     routes: {

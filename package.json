@@ -24,6 +24,7 @@
   "dependencies": {
     "@types/node-fetch": "^2.6.6",
     "discord-interactions": "^3.4.0",
+    "electrodb": "^2.10.2",
     "node-fetch": "^3.3.2",
     "tweetnacl": "^1.0.3"
   }
