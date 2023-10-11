@@ -29,9 +29,7 @@ const sendToSQS = async (item: Item) => {
   }
 };
 
-export const main: APIGatewayProxyHandlerV2 = async (event) => {
-  const body = JSON.parse(event.body!);
-  const { type, data } = body;
+const authenticate = (event: any): Boolean => {
   const sig =
     event.headers["x-signature-ed25519"] ||
     event.headers["X-Signature-Ed25519"];
@@ -39,17 +37,20 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
     event.headers["x-signature-timestamp"] ||
     event.headers["X-Signature-Timestamp"];
   if (!sig || !ts || !event.body) {
-    return {
-      statusCode: 401,
-      body: JSON.stringify("invalid request signature"),
-    };
+    return false;
   }
 
-  const isVerified = nacl.sign.detached.verify(
+  return nacl.sign.detached.verify(
     Buffer.from(ts + event.body),
     Buffer.from(sig, "hex"),
     Buffer.from(Config.PUBLIC_KEY, "hex")
   );
+};
+
+export const main: APIGatewayProxyHandlerV2 = async (event) => {
+  const body = JSON.parse(event.body!);
+  const { type, data } = body;
+  const isVerified = authenticate(event);
 
   if (!isVerified) {
     return {
@@ -58,12 +59,13 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
     };
   }
 
-  if (type == InteractionType.PING) {
+  if (type === InteractionType.PING) {
     return {
       statusCode: 200,
       body: JSON.stringify({ type: InteractionResponseType.PONG }),
     };
   }
+
   if (type === InteractionType.APPLICATION_COMMAND) {
     if (data.name === "ping") {
       const res = {
@@ -75,13 +77,7 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
       return JSON.stringify(res);
     }
   }
-  // const interactor = {
-  //   id: body.member.user.id,
-  //   name: body.member.user.global_name,
-  //   pick: data.custom_id,
-  //   token: body.token,
-  // };
-  // console.log({ interactor });
+
   if (type === InteractionType.MESSAGE_COMPONENT) {
     const postData = {
       id: body.application_id,
