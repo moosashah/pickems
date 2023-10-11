@@ -4,8 +4,9 @@ idea is that an admin will create a poll. users will be able to vote on a team a
 
 intitially it was going to be a golang server but since its a lot of votes within 1-5 mins i was worried about scale/ddosing so make it serverless. also gives me a chance to play with sst
 
-- [ ] Create match  *partially done but maybe need to be able to have multiple game votes at once*
-- [ ] Cancel match
+- [x] Create match
+- [ ] List matches
+- [ ] Close(update) match
 - [x] Pick match winner
 - [x] assigns points
 - [x] list my points
