@@ -62,7 +62,7 @@ export function InteractionsStack({ stack }: StackContext) {
         eventSource: {
           // batchSize: 25,
           maxConcurrency: 500,
-          // maxBatchingWindow: toCdkDuration("30 seconds"),
+          maxBatchingWindow: toCdkDuration("30 seconds"),
         },
       },
     },
@@ -85,7 +85,4 @@ export function InteractionsStack({ stack }: StackContext) {
   stack.addOutputs({
     ApiEndpoint: api.url,
   });
-  return {
-    BOT_TOKEN,
-  };
 }
