@@ -1,20 +1,57 @@
-import { APIGatewayProxyHandlerV2 } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import { InteractionResponseType, InteractionType } from "discord-interactions";
 import AWS from "aws-sdk";
 import { Queue } from "sst/node/queue";
 import { Function } from "sst/node/function";
 import { Config } from "sst/node/config";
+import { Game } from "@pickems/core/database/game";
+import { CreateGame, Item, ParsedBody, teams } from "@pickems/core/types/types";
 import nacl from "tweetnacl";
 const sqs = new AWS.SQS();
 const lambda = new AWS.Lambda();
 
-interface Item {
-  appId: string;
-  token: string;
-  userId: string;
-  pick: "red_id" | "blue_id";
-  gameId: string;
-}
+const extractGameId = (str: string) => (str.match(/\$vote\/(.*?)#/) || [])[1];
+const extractPickId = (str: string) => (str.match(/#(.*)$/) || [])[1];
+
+const createGameInDB = async (rd: string, blu: string) =>
+  (
+    await Game.create({
+      red_side: { team_name: rd },
+      blue_side: { team_name: blu },
+    })
+  ).data.game_id;
+
+const createGame = async (body: CreateGame) => {
+  const { options } = body.data;
+  const blu = options.find((s) => s.name === "blue_side");
+  const rd = options.find((s) => s.name === "red_side");
+  if (!blu || !rd) {
+    return { content: "Could not create game, missing teams" };
+  }
+  if (blu.value === rd.value) {
+    return { content: "Teams cannot play themselves" };
+  }
+  const game_id = await createGameInDB(rd.value, blu.value);
+
+  const opts = options.map((t) => ({
+    type: 2,
+    style: 2,
+    label: teams[t.value],
+    custom_id: `$vote/${game_id}#${t.name}`,
+  }));
+
+  const components = [
+    {
+      type: 1,
+      components: opts,
+    },
+  ];
+
+  return {
+    content: `Match: ${teams[blu.value]} vs ${teams[rd.value]}`,
+    components,
+  };
+};
 
 const sendToSQS = async (item: Item) => {
   const params: AWS.SQS.SendMessageRequest = {
@@ -30,7 +67,7 @@ const sendToSQS = async (item: Item) => {
   }
 };
 
-const authenticate = (event: any): Boolean => {
+const authenticate = (event: APIGatewayEvent): Boolean => {
   const sig =
     event.headers["x-signature-ed25519"] ||
     event.headers["X-Signature-Ed25519"];
@@ -48,8 +85,8 @@ const authenticate = (event: any): Boolean => {
   );
 };
 
-export const main: APIGatewayProxyHandlerV2 = async (event) => {
-  const body = JSON.parse(event.body!);
+export const main = async (event: APIGatewayEvent) => {
+  const body: ParsedBody = JSON.parse(event.body!);
   const { type, data } = body;
   const isVerified = authenticate(event);
 
@@ -77,19 +114,37 @@ export const main: APIGatewayProxyHandlerV2 = async (event) => {
       };
       return JSON.stringify(res);
     }
+
+    if (data.name === "create-game") {
+      if (!data.options) {
+        return JSON.stringify({ type: 4, content: "No options" });
+      }
+      const str = await createGame(body as CreateGame);
+      console.log({ str });
+      return JSON.stringify({ type: 4, data: str });
+    }
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
+    //need to figure out point check payload
     const postData: Item = {
       appId: body.application_id,
       token: body.token,
       userId: body.member.user.id,
-      pick: data.custom_id,
-      gameId: "red-vs-blue",
+      pickId: data.custom_id,
     };
-    if (data.custom_id === "red_id" || data.custom_id === "blue_id") {
+    if ((data.custom_id as string).startsWith("$vote")) {
+      const gameId = extractGameId(body.data.custom_id);
+      const pickId = extractPickId(body.data.custom_id);
+      const voteData: Item = {
+        appId: body.application_id,
+        token: body.token,
+        userId: body.member.user.id,
+        pickId,
+        gameId,
+      };
       try {
-        sendToSQS(postData);
+        sendToSQS(voteData);
       } catch (e) {
         console.error("error sending to queue records: ", e);
         throw e;

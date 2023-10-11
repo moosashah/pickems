@@ -1,5 +1,6 @@
 import { Entity, EntityItem } from "electrodb";
 import { Dynamo } from "./database";
+import { randomUUID } from "crypto";
 
 export * as Game from "./game";
 
@@ -82,8 +83,21 @@ const GameEntity = new Entity(
 
 type GameEntityType = EntityItem<typeof GameEntity>;
 
+type CreateGameEnity = Omit<GameEntityType, "game_id">;
+
+export const create = async (record: CreateGameEnity) => {
+  return await GameEntity.create({
+    game_id: randomUUID(),
+    red_side: record.red_side,
+    blue_side: record.blue_side,
+  }).go();
+};
+
 export const update = async (records: GameEntityType) =>
   await GameEntity.put(records).go();
+
+export const batchGet = async (id: { game_id: string }[]) =>
+  await GameEntity.get(id).go();
 
 export const getActiveGames = async () =>
   await GameEntity.query.byActive({ is_active: true }).go();
