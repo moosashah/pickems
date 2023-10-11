@@ -13,3 +13,5 @@ node_modules
 
 # local env files
 .env*.local
+
+packages/functions/src/interactions/sample/*

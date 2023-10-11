@@ -9,7 +9,7 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [x] Pick match winner
 - [x] assigns points
 - [x] list my points
-- [ ] Add electroDB
+- [x] Add electroDB
 - [ ] Leaderboards
 - [ ] Add ranking
 - [ ] dashboard to show live votes w/timer
