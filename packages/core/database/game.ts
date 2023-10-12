@@ -1,4 +1,4 @@
-import { Entity, EntityItem } from "electrodb";
+import { Entity, EntityItem, QueryResponse } from "electrodb";
 import { Dynamo } from "./database";
 import { randomUUID } from "crypto";
 
@@ -84,6 +84,7 @@ const GameEntity = new Entity(
 );
 
 type GameEntityType = EntityItem<typeof GameEntity>;
+export type GetActiveGameResponse = QueryResponse<typeof GameEntity>;
 
 type CreateGameEnity = Omit<GameEntityType, "game_id">;
 

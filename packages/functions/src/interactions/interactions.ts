@@ -123,6 +123,51 @@ export const main = async (event: APIGatewayEvent) => {
       console.log({ str });
       return JSON.stringify({ type: 4, data: str });
     }
+
+    function createSelectMenu(games: GetActiveGameResponse) {
+      const components = games.data.map((game) => ({
+        label: `${teams[game.red_side.team_name]} vs ${
+          teams[game.blue_side.team_name]
+        }`,
+        value: game.game_id,
+        description: `${teams[game.red_side.team_name]} vs ${
+          teams[game.blue_side.team_name]
+        }`,
+      }));
+
+      return {
+        content: "Select game(s) to close voting for.",
+        components: [
+          {
+            type: 1,
+            components: [
+              {
+                type: 3,
+                custom_id: "close-voting-selection",
+                options: components,
+                placeholder: "Choose.",
+              },
+            ],
+          },
+        ],
+      };
+    }
+
+    if (data.name === "close-voting") {
+      const pl = await Game.getActiveGames();
+      if (!pl.data.length) {
+        return JSON.stringify({
+          type: 4,
+          data: {
+            content: "No active games",
+          },
+        });
+      }
+      return JSON.stringify({
+        type: 4,
+        data: createSelectMenu(pl),
+      });
+    }
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
@@ -161,6 +206,42 @@ export const main = async (event: APIGatewayEvent) => {
       return JSON.stringify({
         type: 4,
         data: { content: "Getting your points...", flags: 64 },
+      });
+    }
+
+    if (data.custom_id === "close-voting-selection") {
+      console.log("close voting select");
+      console.log("close voting select");
+      console.log("close voting select");
+      console.log("close voting select");
+      console.log("close voting select");
+      console.log("close voting select");
+      console.log({ body });
+      console.log({ data });
+      if (!data.values) {
+        return JSON.stringify({
+          type: 4,
+          data: { content: "No game found...", flags: 64 },
+        });
+      }
+      const del = await Game.closeVoting(data.values[0]);
+      //TODO: Update drop down and remove game from options
+
+      if (!del.data) {
+        return JSON.stringify({
+          type: 4,
+          data: { content: "No game found...", flags: 64 },
+        });
+      }
+
+      console.log({ del });
+
+      return JSON.stringify({
+        type: 4,
+        data: {
+          content: "Closed match",
+          flags: 64,
+        },
       });
     }
 

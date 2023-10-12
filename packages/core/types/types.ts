@@ -38,6 +38,7 @@ export interface ParsedBody {
       name: "red_side" | "blue_side";
       value: TeamKey;
     }[];
+    values?: string[];
   };
   application_id: string;
   token: string;
