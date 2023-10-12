@@ -110,6 +110,9 @@ const create = async (record: CreateGameEnity) => {
 const closeVoting = async (id: string) =>
   await GameEntity.patch({ game_id: id }).set({ is_active: false }).go();
 
+const pointsAwarded = async (id: string) =>
+  await GameEntity.patch({ game_id: id }).set({ points_awarded: true }).go();
+
 const batchGet = async (id: { game_id: string }[]) =>
   await GameEntity.get(id).go();
 
@@ -118,12 +121,19 @@ const getActiveGames = async () =>
 
 const migration = async () => {
   for (const game of (await GameEntity.scan.go()).data) {
-    await GameEntity.put(game).go();
+    await GameEntity.delete(game).go();
   }
 };
 
 const getUnrewardedGames = async () => {
-  return await GameEntity.query.byPointsAwarded({ points_awarded: false }).go();
+  return await GameEntity.query
+    .byPointsAwarded({ points_awarded: false })
+    .where(({ is_active }, { eq }) => `${eq(is_active, false)}`)
+    .go();
+};
+
+const getGame = async (id: string) => {
+  return await GameEntity.get({ game_id: id }).go();
 };
 
 export default {
@@ -131,6 +141,8 @@ export default {
   closeVoting,
   create,
   getActiveGames,
+  getGame,
   getUnrewardedGames,
   migration,
+  pointsAwarded,
 };

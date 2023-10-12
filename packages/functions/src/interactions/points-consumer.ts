@@ -1,5 +1,5 @@
 import { SQSEvent } from "aws-lambda";
-import { User } from "@pickems/core/database/user";
+import User from "@pickems/core/database/user";
 
 interface UsersRes {
   user_id: string;

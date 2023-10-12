@@ -1,4 +1,11 @@
-import { CreateGame, CreateSelectMenu, Item, TeamKey, teams } from "./types";
+import {
+  CreateGame,
+  CreateSelectMenu,
+  Item,
+  TeamKey,
+  teams,
+  Event,
+} from "./types";
 import AWS from "aws-sdk";
 import Game from "../core/database/game";
 import { Queue } from "sst/node/queue";
@@ -16,9 +23,6 @@ export function createVotingSelectMenu({
       teams[game.blue_side.team_name as TeamKey]
     }`,
     value: game.game_id,
-    description: `${teams[game.red_side.team_name as TeamKey]} vs ${
-      teams[game.blue_side.team_name as TeamKey]
-    }`,
   }));
 
   return {
@@ -46,24 +50,20 @@ export function createPointsSelectMenu({
   placeholder,
 }: CreateSelectMenu) {
   const components = games.data.flatMap((game) => {
+    const rSide = teams[game.red_side.team_name as TeamKey];
+    const bSide = teams[game.blue_side.team_name as TeamKey];
     const redSide = {
       label: `${teams[game.red_side.team_name as TeamKey]} vs ${
         teams[game.blue_side.team_name as TeamKey]
-      }: ${teams[game.red_side.team_name as TeamKey]}`,
-      value: `${game.game_id}#${game.red_side}`,
-      description: `${teams[game.red_side.team_name as TeamKey]} vs ${
-        teams[game.blue_side.team_name as TeamKey]
-      }: ${teams[game.red_side.team_name as TeamKey]}`,
+      } -> Winner: ${rSide}`,
+      value: `${game.game_id}#red_side`,
     };
 
     const blueSide = {
       label: `${teams[game.red_side.team_name as TeamKey]} vs ${
         teams[game.blue_side.team_name as TeamKey]
-      }: ${teams[game.blue_side.team_name as TeamKey]}`,
-      value: `${game.game_id}#${game.blue_side}`,
-      description: `${teams[game.blue_side.team_name as TeamKey]} vs ${
-        teams[game.blue_side.team_name as TeamKey]
-      }: ${teams[game.blue_side.team_name as TeamKey]}`,
+      } -> Winner: ${bSide}`,
+      value: `${game.game_id}#blue_side`,
     };
     return [redSide, blueSide];
   });
@@ -143,13 +143,6 @@ export const sendToVotesQueue = async (item: Item) => {
     throw e;
   }
 };
-
-interface Event {
-  headers: {
-    [key: string]: string | undefined;
-  };
-  body: string | null;
-}
 
 export const authenticate = (event: Event, nacl: any): Boolean => {
   const sig =

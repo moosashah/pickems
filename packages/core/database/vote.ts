@@ -23,6 +23,10 @@ const VoteEntity = new Entity(
         type: "string",
         required: true,
       },
+      points_awarded: {
+        type: "boolean",
+        default: false,
+      },
     },
     indexes: {
       primary: {
@@ -43,7 +47,7 @@ const VoteEntity = new Entity(
         },
         sk: {
           field: "gsi1sk",
-          composite: [],
+          composite: ["points_awarded"],
         },
       },
     },
@@ -57,11 +61,22 @@ const batchWrite = async (records: VoteEntityType[]) => {
   return await VoteEntity.put(records).go();
 };
 
-const getByPick = async (key: { pick_id: string; game_id: string }) => {
+const getByPick = async (key: {
+  pick_id: string;
+  game_id: string;
+  points_awarded?: boolean;
+}) => {
   return await VoteEntity.query.byPick(key).go();
+};
+
+const migration = async () => {
+  for (const vote of (await VoteEntity.scan.go()).data) {
+    await VoteEntity.delete(vote).go();
+  }
 };
 
 export default {
   batchWrite,
   getByPick,
+  migration,
 };

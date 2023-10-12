@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { Config } from "sst/node/config";
-import { User } from "@pickems/core/database/user";
+import User from "@pickems/core/database/user";
 
 const getUserPoints = async (id: string) => {
   return (await User.get({ user_id: id })).data[0];

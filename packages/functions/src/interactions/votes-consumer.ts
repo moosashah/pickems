@@ -3,7 +3,7 @@ import { SQSEvent } from "aws-lambda";
 import Vote from "@pickems/core/database/vote";
 import Game from "@pickems/core/database/game";
 import AWS from "aws-sdk";
-import { Item, teams } from "@pickems/core/types/types";
+import { Item, TeamKey, teams } from "@pickems/core/types";
 const lambda = new AWS.Lambda();
 
 export const main = async (event: SQSEvent) => {
@@ -37,16 +37,13 @@ export const main = async (event: SQSEvent) => {
       Game.batchGet(gameIds),
       Vote.batchWrite(uniqueData),
     ]);
+    //Need to join vote data into single object since indexes might not match up
 
     console.log(`Saved ${uniqueData.length} recorded to db`);
     for (let i = 0; i < uniqueData.length; i++) {
-      const teamName = teams[data[i][uniqueData[i].pick_id].team_name];
-      const side = uniqueData[i].pick_id;
-      const foo = data[i][uniqueData[i].pick_id];
-      console.log({ teamName });
-      console.log({ data: data[i] });
-      console.log({ side });
-      console.log({ foo });
+      const sideSelection =
+        data[i][uniqueData[i].pick_id as "red_side" | "blue_side"];
+      const teamName = teams[sideSelection.team_name as TeamKey];
 
       const payload = {
         token: uniqueData[i].token,

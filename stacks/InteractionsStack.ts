@@ -71,16 +71,20 @@ export function InteractionsStack({ stack }: StackContext) {
     },
   });
 
+  const awardPoints = new Function(stack, "AwardPoints", {
+    handler: "packages/functions/src/interactions/award-points.main",
+    bind: [table, pointsQueue],
+  });
+
   const api = new Api(stack, "Interactions", {
     defaults: {
       function: {
-        bind: [table, pointsQueue, votesQueue, getPointsFunction],
+        bind: [table, pointsQueue, votesQueue, getPointsFunction, awardPoints],
       },
     },
     routes: {
       "POST /interactions":
         "packages/functions/src/interactions/interactions.main",
-      "POST /votes": "packages/functions/src/interactions/award-points.main",
     },
   });
 

@@ -3,10 +3,17 @@ import { InteractionResponseType, InteractionType } from "discord-interactions";
 import AWS from "aws-sdk";
 import { Function } from "sst/node/function";
 import Game from "@pickems/core/database/game";
-import { CreateGame, Item, ParsedBody } from "@pickems/core/types";
+import {
+  CreateGame,
+  Item,
+  ParsedBody,
+  TeamKey,
+  teams,
+} from "@pickems/core/types";
 import {
   authenticate,
   createGame,
+  createPointsSelectMenu,
   createVotingSelectMenu,
   extractGameId,
   extractPickId,
@@ -50,7 +57,6 @@ export const main = async (event: APIGatewayEvent) => {
         return JSON.stringify({ type: 4, content: "No options" });
       }
       const str = await createGame(body as CreateGame);
-      console.log({ str });
       return JSON.stringify({ type: 4, data: str });
     }
 
@@ -64,17 +70,39 @@ export const main = async (event: APIGatewayEvent) => {
           },
         });
       }
+      const dp = createVotingSelectMenu({
+        games: pl,
+        title: "Select game to close voting for.",
+        placeholder: "Games",
+        customId: "close-voting-selection",
+      });
+
       return JSON.stringify({
         type: 4,
-        data: createVotingSelectMenu({
-          games: pl,
-          title: "Select game to close voting for.",
-          placeholder: "Games",
-          customId: "close-voting-selection",
-        }),
+        data: dp,
       });
     }
 
+    if (data.name === "award-points") {
+      const pl = await Game.getUnrewardedGames();
+      if (!pl.data.length) {
+        return JSON.stringify({
+          type: 4,
+          data: {
+            content: "No Unrewarded games",
+          },
+        });
+      }
+      const dropdown = createPointsSelectMenu({
+        games: pl,
+        title: "Select game to award points for",
+        placeholder: "Games",
+        customId: "award-points-selection",
+      });
+
+      return JSON.stringify({
+        type: 4,
+        data: dropdown,
       });
     }
   }
@@ -119,37 +147,66 @@ export const main = async (event: APIGatewayEvent) => {
     }
 
     if (data.custom_id === "close-voting-selection") {
-      console.log("close voting select");
-      console.log("close voting select");
-      console.log("close voting select");
-      console.log("close voting select");
-      console.log("close voting select");
-      console.log("close voting select");
-      console.log({ body });
-      console.log({ data });
       if (!data.values) {
         return JSON.stringify({
           type: 4,
           data: { content: "No game found...", flags: 64 },
         });
       }
-      const del = await Game.closeVoting(data.values[0]);
+      const game = await Game.closeVoting(data.values[0]);
       //TODO: Update drop down and remove game from options
 
-      if (!del.data) {
+      if (!game.data) {
         return JSON.stringify({
           type: 4,
           data: { content: "No game found...", flags: 64 },
         });
       }
 
-      console.log({ del });
-
       return JSON.stringify({
         type: 4,
         data: {
           content: "Closed match",
           flags: 64,
+        },
+      });
+    }
+
+    if (data.custom_id === "award-points-selection") {
+      if (!data.values) {
+        return JSON.stringify({
+          type: 4,
+          data: { content: "No game found...", flags: 64 },
+        });
+      }
+
+      const [gameId, pickId] = data.values[0].split("#");
+      const game = await Game.getGame(gameId);
+      lambda
+        .invoke({
+          FunctionName: Function.AwardPoints.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify({ game_id: gameId, pick_id: pickId }),
+        })
+        .promise();
+      //TODO: Update drop down and remove game from options
+      if (!game.data) {
+        return JSON.stringify({
+          type: 4,
+          data: { content: "No game found...", flags: 64 },
+        });
+      }
+
+      const teamName =
+        teams[
+          game.data[pickId as "red_side" | "blue_side"].team_name as TeamKey
+        ];
+      await Game.pointsAwarded(gameId);
+
+      return JSON.stringify({
+        type: 4,
+        data: {
+          content: `Awarding...  Winner: ${teamName}`,
         },
       });
     }

@@ -1,5 +1,12 @@
 import { type GetActiveGameResponse } from "@pickems/core/database/game";
 
+export interface Event {
+  headers: {
+    [key: string]: string | undefined;
+  };
+  body: string | null;
+}
+
 export interface Item {
   appId: string;
   token: string;
