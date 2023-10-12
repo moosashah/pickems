@@ -5,7 +5,7 @@ import { Queue } from "sst/node/queue";
 import { Function } from "sst/node/function";
 import { Config } from "sst/node/config";
 import Game, { type GetActiveGameResponse } from "@pickems/core/database/game";
-import { CreateGame, Item, ParsedBody, teams } from "@pickems/core/types/types";
+import { CreateGame, Item, ParsedBody } from "@pickems/core/types";
 import nacl from "tweetnacl";
 const sqs = new AWS.SQS();
 const lambda = new AWS.Lambda();

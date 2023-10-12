@@ -1,3 +1,5 @@
+import { type GetActiveGameResponse } from "@pickems/core/database/game";
+
 export interface Item {
   appId: string;
   token: string;
@@ -6,7 +8,7 @@ export interface Item {
   gameId?: string;
 }
 
-type TeamKey = "bds" | "whales" | "t1" | "weibo" | "g2";
+export type TeamKey = "bds" | "whales" | "t1" | "weibo" | "g2";
 
 type Team = {
   [key in TeamKey]: string;
@@ -47,4 +49,11 @@ export interface ParsedBody {
       id: string;
     };
   };
+}
+
+export interface CreateSelectMenu {
+  games: GetActiveGameResponse;
+  title: string;
+  placeholder: string;
+  customId: string;
 }
