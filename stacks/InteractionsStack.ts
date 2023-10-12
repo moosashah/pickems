@@ -85,4 +85,9 @@ export function InteractionsStack({ stack }: StackContext) {
   stack.addOutputs({
     ApiEndpoint: api.url,
   });
+
+  new Function(stack, "scrap", {
+    handler: "packages/functions/src/scrap.handler",
+    bind: [table],
+  });
 }

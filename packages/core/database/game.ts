@@ -47,6 +47,10 @@ const GameEntity = new Entity(
         type: "boolean",
         default: true,
       },
+      points_awarded: {
+        type: "boolean",
+        default: false,
+      },
       total_votes: {
         type: "number",
       },
@@ -101,3 +105,12 @@ export const batchGet = async (id: { game_id: string }[]) =>
 
 export const getActiveGames = async () =>
   await GameEntity.query.byActive({ is_active: true }).go();
+
+const migration = async () => {
+  for (const game of (await GameEntity.scan.go()).data) {
+    GameEntity.update({ game_id: game.game_id })
+      .set({ points_awarded: false })
+      .go();
+  }
+};
+
