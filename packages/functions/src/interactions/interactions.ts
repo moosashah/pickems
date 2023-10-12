@@ -4,7 +4,7 @@ import AWS from "aws-sdk";
 import { Queue } from "sst/node/queue";
 import { Function } from "sst/node/function";
 import { Config } from "sst/node/config";
-import { Game } from "@pickems/core/database/game";
+import Game, { type GetActiveGameResponse } from "@pickems/core/database/game";
 import { CreateGame, Item, ParsedBody, teams } from "@pickems/core/types/types";
 import nacl from "tweetnacl";
 const sqs = new AWS.SQS();
