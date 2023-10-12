@@ -1,6 +1,6 @@
 import { Function } from "sst/node/function";
 import { SQSEvent } from "aws-lambda";
-import { Vote } from "@pickems/core/database/vote";
+import Vote from "@pickems/core/database/vote";
 import Game from "@pickems/core/database/game";
 import AWS from "aws-sdk";
 import { Item, teams } from "@pickems/core/types/types";

@@ -1,9 +1,7 @@
 import { Entity, EntityItem } from "electrodb";
-import { Dynamo } from "./database";
+import Dynamo from "./database";
 
-export * as Vote from "./vote";
-
-export const VoteEntity = new Entity(
+const VoteEntity = new Entity(
   {
     model: {
       version: "1",
@@ -55,10 +53,15 @@ export const VoteEntity = new Entity(
 
 export type VoteEntityType = EntityItem<typeof VoteEntity>;
 
-export const batchWrite = async (records: VoteEntityType[]) => {
+const batchWrite = async (records: VoteEntityType[]) => {
   return await VoteEntity.put(records).go();
 };
 
-export const getByPick = async (key: { pick_id: string; game_id: string }) => {
+const getByPick = async (key: { pick_id: string; game_id: string }) => {
   return await VoteEntity.query.byPick(key).go();
+};
+
+export default {
+  batchWrite,
+  getByPick,
 };

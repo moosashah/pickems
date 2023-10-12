@@ -1,7 +1,5 @@
 import { Entity, EntityItem } from "electrodb";
-import { Dynamo } from "./database";
-
-export * as User from "./user";
+import Dynamo from "./database";
 
 const UserEntity = new Entity(
   {
@@ -42,14 +40,20 @@ const UserEntity = new Entity(
 
 type UserEntityType = EntityItem<typeof UserEntity>;
 
-export const batchGet = async (ids: { user_id: string }[]) => {
+const batchGet = async (ids: { user_id: string }[]) => {
   return await UserEntity.get(ids).go();
 };
 
-export const get = async (id: { user_id: string }) => {
+const get = async (id: { user_id: string }) => {
   return await UserEntity.query.primary(id).go();
 };
 
-export const batchWrite = async (records: UserEntityType[]) => {
+const batchWrite = async (records: UserEntityType[]) => {
   return await UserEntity.put(records).go();
+};
+
+export default {
+  batchGet,
+  get,
+  batchWrite,
 };

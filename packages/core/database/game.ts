@@ -1,5 +1,5 @@
 import { Entity, EntityItem, QueryResponse } from "electrodb";
-import { Dynamo } from "./database";
+import Dynamo from "./database";
 import { randomUUID } from "crypto";
 
 const GameEntity = new Entity(
