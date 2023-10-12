@@ -78,6 +78,17 @@ const GameEntity = new Entity(
           composite: [],
         },
       },
+      byPointsAwarded: {
+        index: "gsi2",
+        pk: {
+          field: "gsi2pk",
+          composite: [],
+        },
+        sk: {
+          field: "gsi2sk",
+          composite: ["points_awarded"],
+        },
+      },
     },
   },
   Dynamo.Config
@@ -107,16 +118,19 @@ const getActiveGames = async () =>
 
 const migration = async () => {
   for (const game of (await GameEntity.scan.go()).data) {
-    GameEntity.update({ game_id: game.game_id })
-      .set({ points_awarded: false })
-      .go();
+    await GameEntity.put(game).go();
   }
 };
 
+const getUnrewardedGames = async () => {
+  return await GameEntity.query.byPointsAwarded({ points_awarded: false }).go();
+};
+
 export default {
-  migration,
-  getActiveGames,
-  create,
-  closeVoting,
   batchGet,
+  closeVoting,
+  create,
+  getActiveGames,
+  getUnrewardedGames,
+  migration,
 };
