@@ -11,6 +11,7 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [x] assigns points
 - [x] list my points
 - [x] Add electroDB
-- [ ] Leaderboards
-- [ ] Add ranking
+- [x] Leaderboards
+- [x] Add ranking
+- [ ] Refactoring and code clean up
 - [ ] dashboard to show live votes w/timer
