@@ -105,16 +105,28 @@ export const main = async (event: APIGatewayEvent) => {
         data: dropdown,
       });
     }
+
+    if (data.name === "leaderboard") {
+      const funcBody = {
+        token: body.token,
+        appId: body.application_id,
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.CreateLeaderboard.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Getting top 10..." },
+      });
+    }
+
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
-    //need to figure out point check payload
-    const postData: Item = {
-      appId: body.application_id,
-      token: body.token,
-      userId: body.member.user.id,
-      pickId: data.custom_id,
-    };
     if ((data.custom_id as string).startsWith("$vote")) {
       const gameId = extractGameId(body.data.custom_id);
       const pickId = extractPickId(body.data.custom_id);
@@ -122,6 +134,7 @@ export const main = async (event: APIGatewayEvent) => {
         appId: body.application_id,
         token: body.token,
         userId: body.member.user.id,
+        userName: body.member.user.username,
         pickId,
         gameId,
       };

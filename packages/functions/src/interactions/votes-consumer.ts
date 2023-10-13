@@ -18,6 +18,7 @@ export const main = async (event: SQSEvent) => {
       pick_id: body.pickId,
       app_id: body.appId,
       token: body.token,
+      user_name: body.userName,
     };
   });
 
@@ -39,7 +40,7 @@ export const main = async (event: SQSEvent) => {
     ]);
     //Need to join vote data into single object since indexes might not match up
 
-    console.log(`Saved ${uniqueData.length} recorded to db`);
+    console.log(`Saved ${uniqueData.length} votes to db`);
     for (let i = 0; i < uniqueData.length; i++) {
       const sideSelection =
         data[i][uniqueData[i].pick_id as "red_side" | "blue_side"];

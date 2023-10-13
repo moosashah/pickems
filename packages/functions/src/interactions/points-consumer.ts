@@ -3,11 +3,13 @@ import User from "@pickems/core/database/user";
 
 interface UsersRes {
   user_id: string;
-  score: number;
+  user_name: string;
+  score?: number;
 }
 
 interface Key {
   user_id: string;
+  user_name: string;
 }
 
 const getUsersPoints = async (keys: Key[]) => {
@@ -18,7 +20,8 @@ const getUsersPoints = async (keys: Key[]) => {
 const batchUpdatePoints = async (records: UsersRes[]) => {
   const keys = records.map((r) => ({
     user_id: r.user_id,
-    score: r.score + 1,
+    user_name: r.user_name,
+    score: (r.score || 0) + 1,
   }));
   return await User.batchWrite(keys);
 };
@@ -26,6 +29,7 @@ const batchUpdatePoints = async (records: UsersRes[]) => {
 const batchCreateUsers = async (batchGetRes: Key[]) => {
   const batchWriteRecords = batchGetRes.map((rec) => ({
     user_id: rec.user_id,
+    user_name: rec.user_name,
     score: 1,
   }));
   return await User.batchWrite(batchWriteRecords);
@@ -34,8 +38,10 @@ const batchCreateUsers = async (batchGetRes: Key[]) => {
 export const main = async (event: SQSEvent) => {
   const records: any[] = event.Records;
   const keys = records.map((r) => {
+    const body = JSON.parse(r.body);
     return {
-      user_id: JSON.parse(r.body).user_id,
+      user_id: body.user_id,
+      user_name: body.user_name,
     };
   });
 

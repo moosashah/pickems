@@ -12,6 +12,7 @@ export interface Item {
   token: string;
   userId: string;
   pickId: string;
+  userName: string;
   gameId?: string;
 }
 
@@ -54,6 +55,7 @@ export interface ParsedBody {
   member: {
     user: {
       id: string;
+      username: string;
     };
   };
 }

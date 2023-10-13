@@ -41,6 +41,11 @@ export function InteractionsStack({ stack }: StackContext) {
     bind: [BOT_TOKEN],
   });
 
+  const createLeaderboardFunction = new Function(stack, "CreateLeaderboard", {
+    handler: "packages/functions/src/leaderboard.main",
+    bind: [table, updateMessageFunction],
+  });
+
   const pointsQueue = new Queue(stack, "PointsQueue", {
     consumer: {
       function: {
@@ -79,7 +84,14 @@ export function InteractionsStack({ stack }: StackContext) {
   const api = new Api(stack, "Interactions", {
     defaults: {
       function: {
-        bind: [table, pointsQueue, votesQueue, getPointsFunction, awardPoints],
+        bind: [
+          table,
+          pointsQueue,
+          votesQueue,
+          getPointsFunction,
+          awardPoints,
+          createLeaderboardFunction,
+        ],
       },
     },
     routes: {

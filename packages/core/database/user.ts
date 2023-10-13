@@ -14,12 +14,16 @@ const UserEntity = new Entity(
         required: true,
         readOnly: true,
       },
-      score: {
-        type: "number",
+      user_name: {
+        type: "string",
         required: true,
       },
-      ranking: {
+      score: {
         type: "number",
+        default: 0,
+      },
+      ranking: {
+        type: "string",
       },
     },
     indexes: {
@@ -31,6 +35,17 @@ const UserEntity = new Entity(
         sk: {
           field: "sk",
           composite: [],
+        },
+      },
+      byRank: {
+        index: "gsi1",
+        pk: {
+          field: "gsi1pk",
+          composite: [],
+        },
+        sk: {
+          field: "gsi1sk",
+          composite: ["ranking"],
         },
       },
     },
@@ -52,8 +67,30 @@ const batchWrite = async (records: UserEntityType[]) => {
   return await UserEntity.put(records).go();
 };
 
+const write = async (rec: UserEntityType) => {
+  return await UserEntity.put(rec).go();
+};
+
+const scan = async () => {
+  return await UserEntity.scan.go();
+};
+
+const getTopUsers = async () => {
+  return await UserEntity.query.byRank({}).go({ order: "asc", limit: 10 });
+};
+
+const migration = async () => {
+  for (const user of (await UserEntity.scan.go()).data) {
+    await UserEntity.delete(user).go();
+  }
+};
+
 export default {
   batchGet,
   get,
   batchWrite,
+  migration,
+  getTopUsers,
+  write,
+  scan,
 };
