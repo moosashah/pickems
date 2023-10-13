@@ -2,7 +2,6 @@ import { APIGatewayEvent } from "aws-lambda";
 import { InteractionResponseType, InteractionType } from "discord-interactions";
 import AWS from "aws-sdk";
 import { Function } from "sst/node/function";
-import Game from "@pickems/core/database/game";
 import { Item, ParsedBody } from "@pickems/core/types";
 import {
   authenticate,
@@ -76,26 +75,22 @@ export const main = async (event: APIGatewayEvent) => {
     }
 
     if (data.name === "award-points") {
-      const pl = await Game.getUnrewardedGames();
-      if (!pl.data.length) {
-        return JSON.stringify({
-          type: 4,
-          data: {
-            content: "No Unrewarded games",
-          },
-        });
-      }
-      // const dropdown = createPointsSelectMenu({
-      //   games: pl,
-      //   title: "Select game to award points for",
-      //   placeholder: "Games",
-      //   customId: "award-points-selection",
-      // });
-      //
-      // return JSON.stringify({
-      //   type: 4,
-      //   data: dropdown,
-      // });
+      const funcBody = {
+        token: body.token,
+        appId: body.application_id,
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.AwardPoints.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
+
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Getting games..." },
+      });
     }
 
     if (data.name === "leaderboard") {
@@ -167,9 +162,15 @@ export const main = async (event: APIGatewayEvent) => {
       };
       try {
         sendToVotesQueue(voteData);
+        return JSON.stringify({
+          type: 4,
+          data: { content: "Vote added to queue..", flags: 64 },
+        });
       } catch (e) {
-        console.error("error sending to queue records: ", e);
-        throw e;
+        return JSON.stringify({
+          type: 4,
+          data: { content: "Error adding vote to queue: " + e, flags: 64 },
+        });
       }
     }
 
@@ -194,52 +195,36 @@ export const main = async (event: APIGatewayEvent) => {
         .promise();
       return JSON.stringify({
         type: 4,
-        data: { content: "Closing game..." },
+        data: { content: "Closing game...", flags: 64 },
       });
     }
 
     if (data.custom_id === "award-points-selection") {
-      // if (!data.values) {
-      //   return JSON.stringify({
-      //     type: 4,
-      //     data: { content: "No game found...", flags: 64 },
-      //   });
-      // }
-      //
-      // const [gameId, pickId] = data.values[0].split("#");
-      // const game = await Game.getGame(gameId);
-      // lambda
-      //   .invoke({
-      //     FunctionName: Function.AwardPoints.functionName,
-      //     InvocationType: "Event",
-      //     Payload: JSON.stringify({ game_id: gameId, pick_id: pickId }),
-      //   })
-      //   .promise();
-      // if (!game.data) {
-      //   return JSON.stringify({
-      //     type: 4,
-      //     data: { content: "No game found...", flags: 64 },
-      //   });
-      // }
-      //
-      // const teamName =
-      //   teams[
-      //     game.data[pickId as "red_side" | "blue_side"].team_name as TeamKey
-      //   ];
-      // await Game.pointsAwarded(gameId);
-      //
-      // return JSON.stringify({
-      //   type: 4,
-      //   data: {
-      //     content: `Awarding...  Winner: ${teamName}`,
-      //   },
-      // });
+      if (!data.values) {
+        return JSON.stringify({
+          type: 4,
+          data: { content: "No game found...", flags: 64 },
+        });
+      }
+      const [gameId, pickId] = data.values[0].split("#");
+      const funcBody = {
+        gameId,
+        pickId,
+        token: body.token,
+        appId: body.application_id,
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.AwardPointsSelection.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Rewarding...", flags: 64 },
+      });
     }
-
-    return JSON.stringify({
-      type: 5,
-      data: { flags: 64 },
-    });
   }
 
   return {

@@ -94,7 +94,7 @@ const GameEntity = new Entity(
   Dynamo.Config
 );
 
-type GameEntityType = EntityItem<typeof GameEntity>;
+export type GameEntityType = EntityItem<typeof GameEntity>;
 export type GetActiveGameResponse = QueryResponse<typeof GameEntity>;
 
 type CreateGameEnity = Omit<GameEntityType, "game_id">;
@@ -115,8 +115,14 @@ const closeVoting = async (id: string) => {
   return await GameEntity.put({ ...game.data[0], is_active: false }).go();
 };
 
-const pointsAwarded = async (id: string) =>
-  await GameEntity.patch({ game_id: id }).set({ points_awarded: true }).go();
+const pointsAwarded = async (id: string) => {
+  const g = await GameEntity.query
+    .primary({ game_id: id })
+    .where(({ points_awarded }, { eq }) => `${eq(points_awarded, false)}`)
+    .go();
+  if (!g.data.length) return `no game found`;
+  return await GameEntity.put({ ...g.data[0], points_awarded: true }).go();
+};
 
 const batchGet = async (id: { game_id: string }[]) =>
   await GameEntity.get(id).go();
@@ -137,7 +143,7 @@ const getUnrewardedGames = async () => {
     .go();
 };
 
-const getGame = async (id: string) => {
+const get = async (id: string) => {
   return await GameEntity.get({ game_id: id }).go();
 };
 
@@ -146,7 +152,7 @@ export default {
   closeVoting,
   create,
   getActiveGames,
-  getGame,
+  get,
   getUnrewardedGames,
   migration,
   pointsAwarded,

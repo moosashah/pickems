@@ -43,12 +43,12 @@ export function InteractionsStack({ stack }: StackContext) {
 
   const createLeaderboardFunction = new Function(stack, "CreateLeaderboard", {
     handler: "packages/functions/src/leaderboard.main",
-    bind: [table, updateMessageFunction],
+    bind: [table, updateMessageFunction, BOT_TOKEN],
   });
 
   const updateRankingFunction = new Function(stack, "UpdateRanking", {
     handler: "packages/functions/src/update-ranks.main",
-    bind: [table, updateMessageFunction],
+    bind: [table, updateMessageFunction, BOT_TOKEN],
   });
 
   const closeVotingFunction = new Function(stack, "CloseVoting", {
@@ -67,6 +67,11 @@ export function InteractionsStack({ stack }: StackContext) {
 
   const createGameFunction = new Function(stack, "CreateGame", {
     handler: "packages/functions/src/interactions/create-game.main",
+    bind: [table, updateMessageFunction, BOT_TOKEN],
+  });
+
+  const awardPointsFunction = new Function(stack, "AwardPoints", {
+    handler: "packages/functions/src/interactions/award-points.main",
     bind: [table, updateMessageFunction, BOT_TOKEN],
   });
 
@@ -100,9 +105,9 @@ export function InteractionsStack({ stack }: StackContext) {
     },
   });
 
-  const awardPoints = new Function(stack, "AwardPoints", {
-    handler: "packages/functions/src/interactions/award-points.main",
-    bind: [table, pointsQueue],
+  const awardPointsSelection = new Function(stack, "AwardPointsSelection", {
+    handler: "packages/functions/src/interactions/award-points-selection.main",
+    bind: [table, pointsQueue, BOT_TOKEN],
   });
 
   const api = new Api(stack, "Interactions", {
@@ -113,7 +118,8 @@ export function InteractionsStack({ stack }: StackContext) {
           pointsQueue,
           votesQueue,
           getPointsFunction,
-          awardPoints,
+          awardPointsSelection,
+          awardPointsFunction,
           createLeaderboardFunction,
           updateRankingFunction,
           closeVotingFunction,
