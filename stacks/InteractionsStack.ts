@@ -46,6 +46,11 @@ export function InteractionsStack({ stack }: StackContext) {
     bind: [table, updateMessageFunction],
   });
 
+  const updateRankingFunction = new Function(stack, "UpdateRanking", {
+    handler: "packages/functions/src/update-ranks.main",
+    bind: [table, updateMessageFunction],
+  });
+
   const pointsQueue = new Queue(stack, "PointsQueue", {
     consumer: {
       function: {
@@ -91,6 +96,7 @@ export function InteractionsStack({ stack }: StackContext) {
           getPointsFunction,
           awardPoints,
           createLeaderboardFunction,
+          updateRankingFunction,
         ],
       },
     },

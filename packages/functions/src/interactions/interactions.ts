@@ -124,6 +124,24 @@ export const main = async (event: APIGatewayEvent) => {
       });
     }
 
+
+    if (data.name === "update-ranking") {
+      const funcBody = {
+        token: body.token,
+        appId: body.application_id,
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.UpdateRanking.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Updating ranks....", flags: 64 },
+      });
+    }
   }
 
   if (type === InteractionType.MESSAGE_COMPONENT) {
