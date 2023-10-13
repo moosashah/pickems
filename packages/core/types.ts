@@ -62,7 +62,6 @@ export interface ParsedBody {
 
 export interface CreateSelectMenu {
   games: GetActiveGameResponse;
-  title: string;
   placeholder: string;
   customId: string;
 }

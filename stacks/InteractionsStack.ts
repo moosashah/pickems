@@ -51,6 +51,20 @@ export function InteractionsStack({ stack }: StackContext) {
     bind: [table, updateMessageFunction],
   });
 
+  const closeVotingFunction = new Function(stack, "CloseVoting", {
+    handler: "packages/functions/src/interactions/close-voting.main",
+    bind: [table, updateMessageFunction, BOT_TOKEN],
+  });
+
+  const closeVotingSelectionFunction = new Function(
+    stack,
+    "CloseVotingSelection",
+    {
+      handler: "packages/functions/src/interactions/close-voting.selection",
+      bind: [table, updateMessageFunction, BOT_TOKEN],
+    }
+  );
+
   const pointsQueue = new Queue(stack, "PointsQueue", {
     consumer: {
       function: {
@@ -97,6 +111,8 @@ export function InteractionsStack({ stack }: StackContext) {
           awardPoints,
           createLeaderboardFunction,
           updateRankingFunction,
+          closeVotingFunction,
+          closeVotingSelectionFunction,
         ],
       },
     },

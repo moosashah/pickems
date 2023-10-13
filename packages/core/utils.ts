@@ -10,80 +10,83 @@ import AWS from "aws-sdk";
 import Game from "../core/database/game";
 import { Queue } from "sst/node/queue";
 import { Config } from "sst/node/config";
+import fetch from "node-fetch";
 
 const sqs = new AWS.SQS();
 export function createVotingSelectMenu({
   games,
-  title,
   customId,
   placeholder,
-}: CreateSelectMenu) {
-  const components = games.data.map((game) => ({
-    label: `${teams[game.red_side.team_name as TeamKey]} vs ${
-      teams[game.blue_side.team_name as TeamKey]
-    }`,
-    value: game.game_id,
-  }));
+}: CreateSelectMenu): Dropdown {
+  const components = games.data.map((game) => {
+    const { rSide, bSide } = pullNames(game);
+    return {
+      label: `${rSide} vs ${bSide}`,
+      value: game.game_id,
+    };
+  });
 
-  return {
-    content: title,
-    components: [
-      {
-        type: 1,
-        components: [
-          {
-            type: 3,
-            custom_id: customId,
-            options: components,
-            placeholder,
-          },
-        ],
-      },
-    ],
-  };
+  return [
+    {
+      type: 1,
+      components: [
+        {
+          type: 3,
+          custom_id: customId,
+          options: components,
+          placeholder,
+        },
+      ],
+    },
+  ];
 }
+
+export const pullNames = (game: any): { rSide: string; bSide: string } => {
+  const rSide = teams[game.red_side.team_name as TeamKey];
+  const bSide = teams[game.blue_side.team_name as TeamKey];
+
+  return { rSide, bSide };
+};
+
+export const formatMatchLabel = (game: any) => {
+  const { rSide, bSide } = pullNames(game);
+  return `${rSide} vs ${bSide}`;
+};
 
 export function createPointsSelectMenu({
   games,
-  title,
   customId,
   placeholder,
-}: CreateSelectMenu) {
+}: CreateSelectMenu): Dropdown {
   const components = games.data.flatMap((game) => {
-    const rSide = teams[game.red_side.team_name as TeamKey];
-    const bSide = teams[game.blue_side.team_name as TeamKey];
+    // const rSide = teams[game.red_side.team_name as TeamKey];
+    // const bSide = teams[game.blue_side.team_name as TeamKey];
+    const { rSide, bSide } = pullNames(game);
     const redSide = {
-      label: `${teams[game.red_side.team_name as TeamKey]} vs ${
-        teams[game.blue_side.team_name as TeamKey]
-      } -> Winner: ${rSide}`,
+      label: `${rSide} vs ${bSide} -> Winner: ${rSide}`,
       value: `${game.game_id}#red_side`,
     };
 
     const blueSide = {
-      label: `${teams[game.red_side.team_name as TeamKey]} vs ${
-        teams[game.blue_side.team_name as TeamKey]
-      } -> Winner: ${bSide}`,
+      label: `${rSide} vs ${bSide} -> Winner: ${bSide}`,
       value: `${game.game_id}#blue_side`,
     };
     return [redSide, blueSide];
   });
 
-  return {
-    content: title,
-    components: [
-      {
-        type: 1,
-        components: [
-          {
-            type: 3,
-            custom_id: customId,
-            options: components,
-            placeholder,
-          },
-        ],
-      },
-    ],
-  };
+  return [
+    {
+      type: 1,
+      components: [
+        {
+          type: 3,
+          custom_id: customId,
+          options: components,
+          placeholder,
+        },
+      ],
+    },
+  ];
 }
 
 export const extractGameId = (str: string) =>
@@ -160,4 +163,54 @@ export const authenticate = (event: Event, nacl: any): Boolean => {
     Buffer.from(sig, "hex"),
     Buffer.from(Config.PUBLIC_KEY, "hex")
   );
+};
+
+interface DropdownOption {
+  label: string;
+  value: string;
+}
+
+interface Component {
+  type: number;
+  custom_id: string;
+  options: DropdownOption[];
+  placeholder: string;
+}
+
+interface DropdownItem {
+  type: number;
+  components: Component[];
+}
+
+type Dropdown = DropdownItem[];
+
+interface Reply {
+  title: string;
+  id: string;
+  token: string;
+  components?: Dropdown;
+}
+
+export const reply = async ({ title, id, token, components }: Reply) => {
+  const url = `https://discord.com/api/v10/webhooks/${id}/${token}/messages/@original`;
+
+  const params = {
+    method: "PATCH",
+    headers: {
+      "Content-type": "application/json",
+      Authorization: "Bot " + Config.BOT_TOKEN,
+    },
+    body: JSON.stringify({
+      type: 4,
+      content: title,
+      components,
+    }),
+  };
+
+  try {
+    return await fetch(url, params);
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
 };

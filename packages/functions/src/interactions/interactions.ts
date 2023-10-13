@@ -14,7 +14,6 @@ import {
   authenticate,
   createGame,
   createPointsSelectMenu,
-  createVotingSelectMenu,
   extractGameId,
   extractPickId,
   sendToVotesQueue,
@@ -33,8 +32,6 @@ export const main = async (event: APIGatewayEvent) => {
       body: JSON.stringify("invalid request signature"),
     };
   }
-
-  console.log({ body });
 
   if (type === InteractionType.PING) {
     return {
@@ -63,25 +60,20 @@ export const main = async (event: APIGatewayEvent) => {
     }
 
     if (data.name === "close-voting") {
-      const pl = await Game.getActiveGames();
-      if (!pl.data.length) {
-        return JSON.stringify({
-          type: 4,
-          data: {
-            content: "No active games",
-          },
-        });
-      }
-      const dp = createVotingSelectMenu({
-        games: pl,
-        title: "Select game to close voting for.",
-        placeholder: "Games",
-        customId: "close-voting-selection",
-      });
-
+      const funcBody = {
+        token: body.token,
+        appId: body.application_id,
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.CloseVoting.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
       return JSON.stringify({
         type: 4,
-        data: dp,
+        data: { content: "Getting games..." },
       });
     }
 
@@ -95,17 +87,17 @@ export const main = async (event: APIGatewayEvent) => {
           },
         });
       }
-      const dropdown = createPointsSelectMenu({
-        games: pl,
-        title: "Select game to award points for",
-        placeholder: "Games",
-        customId: "award-points-selection",
-      });
-
-      return JSON.stringify({
-        type: 4,
-        data: dropdown,
-      });
+      // const dropdown = createPointsSelectMenu({
+      //   games: pl,
+      //   title: "Select game to award points for",
+      //   placeholder: "Games",
+      //   customId: "award-points-selection",
+      // });
+      //
+      // return JSON.stringify({
+      //   type: 4,
+      //   data: dropdown,
+      // });
     }
 
     if (data.name === "leaderboard") {
@@ -190,22 +182,21 @@ export const main = async (event: APIGatewayEvent) => {
           data: { content: "No game found...", flags: 64 },
         });
       }
-      const game = await Game.closeVoting(data.values[0]);
-      //TODO: Update drop down and remove game from options
-
-      if (!game.data) {
-        return JSON.stringify({
-          type: 4,
-          data: { content: "No game found...", flags: 64 },
-        });
-      }
-
+      const funcBody = {
+        token: body.token,
+        appId: body.application_id,
+        gameId: data.values[0],
+      };
+      lambda
+        .invoke({
+          FunctionName: Function.CloseVotingSelection.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(funcBody),
+        })
+        .promise();
       return JSON.stringify({
         type: 4,
-        data: {
-          content: "Closed match",
-          flags: 64,
-        },
+        data: { content: "Closing game..." },
       });
     }
 
@@ -226,7 +217,6 @@ export const main = async (event: APIGatewayEvent) => {
           Payload: JSON.stringify({ game_id: gameId, pick_id: pickId }),
         })
         .promise();
-      //TODO: Update drop down and remove game from options
       if (!game.data) {
         return JSON.stringify({
           type: 4,

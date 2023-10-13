@@ -107,8 +107,14 @@ const create = async (record: CreateGameEnity) => {
   }).go();
 };
 
-const closeVoting = async (id: string) =>
-  await GameEntity.patch({ game_id: id }).set({ is_active: false }).go();
+const closeVoting = async (id: string) => {
+  const game = await GameEntity.query
+    .primary({ game_id: id })
+    .where(({ is_active }, { eq }) => `${eq(is_active, true)}`)
+    .go();
+  if (!game.data.length) return `no game found`;
+  return await GameEntity.put({ ...game.data[0], is_active: false }).go();
+};
 
 const pointsAwarded = async (id: string) =>
   await GameEntity.patch({ game_id: id }).set({ points_awarded: true }).go();
