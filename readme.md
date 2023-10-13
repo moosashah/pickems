@@ -14,6 +14,7 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [x] Leaderboards
 - [x] Add ranking
 - [x] Refactoring and code clean up
+- [x] Add team names to teams consts
 - [ ] Cron job to start game voting
 - [ ] Cron job to close game voting
 - [ ] Web scrap to get future games
@@ -51,24 +52,92 @@ intitially it was going to be a golang server but since its a lot of votes withi
       "required": true,
       "choices": [
         {
-          "name": "Team BDS",
+          "label": "Team BDS",
           "value": "bds"
         },
         {
-          "name": "Team Whales",
-          "value": "whales"
+          "label": "Team Whales",
+          "value": "tw"
         },
         {
-          "name": "T1",
+          "label": "T1",
           "value": "t1"
         },
         {
-          "name": "weibo gaming",
-          "value": "weibo"
+          "label": "Weibo Gaming",
+          "value": "wbg"
         },
         {
-          "name": "G2",
+          "label": "G2 Esports",
           "value": "g2"
+        },
+        {
+          "label": "GAM Esports",
+          "value": "gam"
+        },
+        {
+          "label": "Loud",
+          "value": "lll"
+        },
+        {
+          "label": "CTBC Flying Oyster",
+          "value": "cfo"
+        },
+        {
+          "label": "PSG Talon",
+          "value": "psg"
+        },
+        {
+          "label": "Detonation Focusme",
+          "value": "dfm"
+        },
+        {
+          "label": "NRG",
+          "value": "nrg"
+        },
+        {
+          "label": "Cloud9",
+          "value": "c9"
+        },
+        {
+          "label": "Team Liquid",
+          "value": "tl"
+        },
+        {
+          "label": "Fnatic",
+          "value": "fnc"
+        },
+        {
+          "label": "Mad Lions",
+          "value": "mad"
+        },
+        {
+          "label": "kt Rolster",
+          "value": "kt"
+        },
+        {
+          "label": "Gen.G",
+          "value": "gen"
+        },
+        {
+          "label": "Dplus KIA",
+          "value": "dpk"
+        },
+        {
+          "label": "JD Gaming",
+          "value": "jdg"
+        },
+        {
+          "label": "Bilibili Gaming",
+          "value": "blg"
+        },
+        {
+          "label": "LNG Esports",
+          "value": "lng"
+        },
+        {
+          "label": "Movistar 7",
+          "value": "r7"
         }
       ]
     },
@@ -79,24 +148,92 @@ intitially it was going to be a golang server but since its a lot of votes withi
       "required": true,
       "choices": [
         {
-          "name": "Team BDS",
+          "label": "Team BDS",
           "value": "bds"
         },
         {
-          "name": "Team Whales",
-          "value": "whales"
+          "label": "Team Whales",
+          "value": "tw"
         },
         {
-          "name": "T1",
+          "label": "T1",
           "value": "t1"
         },
         {
-          "name": "weibo gaming",
-          "value": "weibo"
+          "label": "Weibo Gaming",
+          "value": "wbg"
         },
         {
-          "name": "G2",
+          "label": "G2 Esports",
           "value": "g2"
+        },
+        {
+          "label": "GAM Esports",
+          "value": "gam"
+        },
+        {
+          "label": "Loud",
+          "value": "lll"
+        },
+        {
+          "label": "CTBC Flying Oyster",
+          "value": "cfo"
+        },
+        {
+          "label": "PSG Talon",
+          "value": "psg"
+        },
+        {
+          "label": "Detonation Focusme",
+          "value": "dfm"
+        },
+        {
+          "label": "NRG",
+          "value": "nrg"
+        },
+        {
+          "label": "Cloud9",
+          "value": "c9"
+        },
+        {
+          "label": "Team Liquid",
+          "value": "tl"
+        },
+        {
+          "label": "Fnatic",
+          "value": "fnc"
+        },
+        {
+          "label": "Mad Lions",
+          "value": "mad"
+        },
+        {
+          "label": "kt Rolster",
+          "value": "kt"
+        },
+        {
+          "label": "Gen.G",
+          "value": "gen"
+        },
+        {
+          "label": "Dplus KIA",
+          "value": "dpk"
+        },
+        {
+          "label": "JD Gaming",
+          "value": "jdg"
+        },
+        {
+          "label": "Bilibili Gaming",
+          "value": "blg"
+        },
+        {
+          "label": "LNG Esports",
+          "value": "lng"
+        },
+        {
+          "label": "Movistar 7",
+          "value": "r7"
         }
       ]
     }

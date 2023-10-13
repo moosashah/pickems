@@ -1,4 +1,5 @@
 import { type GetActiveGameResponse } from "@pickems/core/database/game";
+import { teams } from "./teams";
 
 export interface Event {
   headers: {
@@ -16,7 +17,7 @@ export interface Item {
   gameId?: string;
 }
 
-export type TeamKey = "bds" | "whales" | "t1" | "weibo" | "g2";
+export type TeamKey = keyof typeof teams;
 
 export type Team = {
   [key in TeamKey]: string;

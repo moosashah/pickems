@@ -1,9 +1,23 @@
-import { Team } from "./types";
-
-export const teams: Team = {
+export const teams = {
   bds: "Team BDS",
-  whales: "Team Whales",
-  t1: "SKT T1",
-  weibo: "Weibo Gaming",
-  g2: "G2 Gaming",
+  tw: "Team Whales",
+  t1: "T1",
+  wbg: "Weibo Gaming",
+  g2: "G2 Esports",
+  gam: "GAM Esports",
+  lll: "Loud",
+  cfo: "CTBC Flying Oyster",
+  psg: "PSG Talon",
+  dfm: "Detonation Focusme",
+  nrg: "NRG",
+  c9: "Cloud9",
+  tl: "Team Liquid",
+  fnc: "Fnatic",
+  mad: "Mad Lions",
+  kt: "kt Rolster",
+  gen: "Gen.G",
+  dpk: "Dplus KIA",
+  jdg: "JD Gaming",
+  blg: "Bilibili Gaming",
+  lng: "LNG Esports",
 };
