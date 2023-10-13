@@ -93,6 +93,12 @@ export function InteractionsStack({ stack }: StackContext) {
     ApiEndpoint: api.url,
   });
 
+  new Function(stack, "clearTable", {
+    handler: "packages/functions/src/clearTable.handler",
+    timeout: `30 seconds`,
+    bind: [table],
+  });
+
   new Function(stack, "scrap", {
     handler: "packages/functions/src/scrap.handler",
     bind: [table],
