@@ -124,6 +124,23 @@ export const main = async (event: APIGatewayEvent) => {
       });
     }
 
+    if (data.name === "points") {
+      lambda
+        .invoke({
+          FunctionName: Function.GetPointsFunction.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify({
+            userId: body.member.user.id,
+            token: body.token,
+            appId: body.application_id,
+          }),
+        })
+        .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Getting your points...", flags: 64 },
+      });
+    }
 
     if (data.name === "update-ranking") {
       const funcBody = {
@@ -162,19 +179,6 @@ export const main = async (event: APIGatewayEvent) => {
         console.error("error sending to queue records: ", e);
         throw e;
       }
-    }
-    if (data.custom_id === "point_check") {
-      lambda
-        .invoke({
-          FunctionName: Function.GetPointsFunction.functionName,
-          InvocationType: "Event",
-          Payload: JSON.stringify(postData),
-        })
-        .promise();
-      return JSON.stringify({
-        type: 4,
-        data: { content: "Getting your points...", flags: 64 },
-      });
     }
 
     if (data.custom_id === "close-voting-selection") {

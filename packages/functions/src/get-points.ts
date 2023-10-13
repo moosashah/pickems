@@ -42,7 +42,7 @@ export const main = async (event: funcBody) => {
     return await reply("You have no points", event.appId, event.token);
   } else {
     return await reply(
-      `You have ${points.score} points`,
+      `You are rank: ${points.ranking} with ${points.score} points`,
       event.appId,
       event.token
     );
