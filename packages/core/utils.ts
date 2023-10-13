@@ -11,6 +11,7 @@ import AWS from "aws-sdk";
 import { Queue } from "sst/node/queue";
 import { Config } from "sst/node/config";
 import fetch from "node-fetch";
+import { GameEntityType } from "./database/game";
 
 const sqs = new AWS.SQS();
 export function createVotingSelectMenu({
@@ -41,7 +42,14 @@ export function createVotingSelectMenu({
   ];
 }
 
-export const pullNames = (game: any): { rSide: string; bSide: string } => {
+export const pullTeamName = (
+  pickId: "red_side" | "blue_side",
+  game: GameEntityType
+) => teams[game[pickId].team_name as TeamKey];
+
+export const pullNames = (
+  game: GameEntityType
+): { rSide: string; bSide: string } => {
   const rSide = teams[game.red_side.team_name as TeamKey];
   const bSide = teams[game.blue_side.team_name as TeamKey];
 

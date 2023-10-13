@@ -12,20 +12,24 @@ interface funcBody {
 }
 
 export const main = async (event: funcBody) => {
-  const points = await getUserPoints(event.userId);
+  const user = await getUserPoints(event.userId);
 
-  if (!points) {
-    return await reply("You have no points", event.appId, event.token);
+  if (!user) {
+    return await reply({
+      title: "You have no points",
+      token: event.token,
+      id: event.appId,
+    });
   } else {
     let str: string;
-    if (!points.ranking) {
-      str = `You have ${points.score} points, error getting rank`;
+    if (!user.ranking) {
+      str = `You have ${user.score} points, error getting rank`;
     } else {
-      str = `You are rank: ${parseInt(points.ranking).toString()} with ${
-        points.score
-      } ${(points.score as number) > 1 ? "points" : "point"}`;
+      str = `You are rank: ${parseInt(user.ranking).toString()} with ${
+        user.score
+      } ${(user.score as number) > 1 ? "points" : "point"}`;
     }
 
-    return await reply(str, event.appId, event.token);
+    return await reply({ title: str, id: event.appId, token: event.token });
   }
 };

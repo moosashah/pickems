@@ -1,28 +1,10 @@
 import User from "@pickems/core/database/user";
-import { Function } from "sst/node/function";
-import AWS from "aws-sdk";
-const lambda = new AWS.Lambda();
+import { reply } from "@pickems/core/utils";
 
 interface Event {
   appId: string;
   token: string;
 }
-
-interface updateMessageFuncBody {
-  token: string;
-  app_id: string;
-  message: string;
-}
-
-const reply = (funcBody: updateMessageFuncBody) => {
-  lambda
-    .invoke({
-      FunctionName: Function.UpdateMessage.functionName,
-      InvocationType: "Event",
-      Payload: JSON.stringify(funcBody),
-    })
-    .promise();
-};
 
 interface user {
   user_id: string;
@@ -43,17 +25,24 @@ const createLB = (lb: user[]): string => {
 export const main = async (event: Event) => {
   try {
     const { data: lb } = await User.getTopUsers();
+    if (!lb.length) {
+      return reply({
+        token: event.token,
+        id: event.appId,
+        title: "No user ranks found, try running '/update-ranking'",
+      });
+    }
     const lbs = createLB(lb as user[]);
     reply({
       token: event.token,
-      app_id: event.appId,
-      message: lbs,
+      id: event.appId,
+      title: lbs,
     });
   } catch (error) {
     reply({
       token: event.token,
-      app_id: event.appId,
-      message: "Error try again..",
+      id: event.appId,
+      title: "Error try again..",
     });
   }
 };
