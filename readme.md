@@ -13,5 +13,8 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [x] Add electroDB
 - [x] Leaderboards
 - [x] Add ranking
-- [ ] Refactoring and code clean up
-- [ ] dashboard to show live votes w/timer
+- [x] Refactoring and code clean up
+- [ ] Cron job to start game voting
+- [ ] Cron job to close game voting
+- [ ] Web scrap to get future games
+- [ ] Hook to cron jobs
