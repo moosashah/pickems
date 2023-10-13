@@ -18,3 +18,139 @@ intitially it was going to be a golang server but since its a lot of votes withi
 - [ ] Cron job to close game voting
 - [ ] Web scrap to get future games
 - [ ] Hook to cron jobs
+
+
+
+
+## Commands to register
+
+[Register command docs][RGD]
+
+
+
+### Ping
+```
+{
+  "name": "ping",
+  "description": "Replises with pong",
+  "type": 1
+}
+```
+
+### Create game
+```
+{
+  "type": 1,
+  "name": "create-game",
+  "description": "Create pickems game",
+  "guild_id": "1159155607287369834",
+  "options": [
+    {
+      "type": 3,
+      "name": "red_side",
+      "description": "Red side team",
+      "required": true,
+      "choices": [
+        {
+          "name": "Team BDS",
+          "value": "bds"
+        },
+        {
+          "name": "Team Whales",
+          "value": "whales"
+        },
+        {
+          "name": "T1",
+          "value": "t1"
+        },
+        {
+          "name": "weibo gaming",
+          "value": "weibo"
+        },
+        {
+          "name": "G2",
+          "value": "g2"
+        }
+      ]
+    },
+    {
+      "type": 3,
+      "name": "blue_side",
+      "description": "Blue side team",
+      "required": true,
+      "choices": [
+        {
+          "name": "Team BDS",
+          "value": "bds"
+        },
+        {
+          "name": "Team Whales",
+          "value": "whales"
+        },
+        {
+          "name": "T1",
+          "value": "t1"
+        },
+        {
+          "name": "weibo gaming",
+          "value": "weibo"
+        },
+        {
+          "name": "G2",
+          "value": "g2"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Close voting
+```
+{
+  "type": 1,
+  "name": "close-voting",
+  "description": "Get drop down of open games and select one to close"
+}
+```
+
+### Award points
+```
+{
+  "type": 1,
+  "name": "award-points",
+  "description": "Get drop down of games and select one to award points for."
+}
+```
+
+### Leaderboard
+```
+{
+  "type": 1,
+  "name": "leaderboard",
+  "description": "See top 10"
+}
+```
+
+### Get your point and rank
+```
+{
+  "type": 1,
+  "name": "points",
+  "description": "Get your points and ranking"
+}
+```
+
+### Update rankings
+```
+{
+  "type": 1,
+  "name": "update-ranking",
+  "description": "Update user ranks in database"
+}
+```
+
+
+
+
+[RGD]: https://discord.com/developers/docs/interactions/application-commands#registering-a-command
