@@ -18,26 +18,9 @@ export interface Item {
 
 export type TeamKey = "bds" | "whales" | "t1" | "weibo" | "g2";
 
-type Team = {
+export type Team = {
   [key in TeamKey]: string;
 };
-
-export const teams: Team = {
-  bds: "Team BDS",
-  whales: "Team Whales",
-  t1: "SKT T1",
-  weibo: "Weibo Gaming",
-  g2: "G2 Gaming",
-};
-
-export interface CreateGame {
-  data: {
-    options: {
-      name: "red_side" | "blue_side";
-      value: TeamKey;
-    }[];
-  };
-}
 
 export interface ParsedBody {
   type: number;
@@ -64,4 +47,42 @@ export interface CreateSelectMenu {
   games: GetActiveGameResponse;
   placeholder: string;
   customId: string;
+}
+
+export interface Button {
+  type: 2;
+  style: 2;
+  label: string;
+  custom_id: string;
+}
+
+export interface ButtonComponent {
+  type: 1;
+  components: Button[];
+}
+
+interface DropdownOption {
+  label: string;
+  value: string;
+}
+
+interface SelectMenuComponent {
+  type: number;
+  custom_id: string;
+  options: DropdownOption[];
+  placeholder: string;
+}
+
+interface DropdownItem {
+  type: number;
+  components: SelectMenuComponent[];
+}
+
+export type Dropdown = DropdownItem[];
+
+export interface Reply {
+  title: string;
+  id: string;
+  token: string;
+  components?: Dropdown | ButtonComponent[];
 }

@@ -65,6 +65,11 @@ export function InteractionsStack({ stack }: StackContext) {
     }
   );
 
+  const createGameFunction = new Function(stack, "CreateGame", {
+    handler: "packages/functions/src/interactions/create-game.main",
+    bind: [table, updateMessageFunction, BOT_TOKEN],
+  });
+
   const pointsQueue = new Queue(stack, "PointsQueue", {
     consumer: {
       function: {
@@ -113,6 +118,7 @@ export function InteractionsStack({ stack }: StackContext) {
           updateRankingFunction,
           closeVotingFunction,
           closeVotingSelectionFunction,
+          createGameFunction,
         ],
       },
     },

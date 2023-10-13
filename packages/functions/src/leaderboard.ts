@@ -7,6 +7,7 @@ interface Event {
   appId: string;
   token: string;
 }
+
 interface updateMessageFuncBody {
   token: string;
   app_id: string;

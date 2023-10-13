@@ -99,13 +99,12 @@ export type GetActiveGameResponse = QueryResponse<typeof GameEntity>;
 
 type CreateGameEnity = Omit<GameEntityType, "game_id">;
 
-const create = async (record: CreateGameEnity) => {
-  return await GameEntity.create({
+const create = async (record: CreateGameEnity) =>
+  await GameEntity.create({
     game_id: randomUUID(),
     red_side: record.red_side,
     blue_side: record.blue_side,
   }).go();
-};
 
 const closeVoting = async (id: string) => {
   const game = await GameEntity.query

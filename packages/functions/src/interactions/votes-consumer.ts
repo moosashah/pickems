@@ -3,7 +3,8 @@ import { SQSEvent } from "aws-lambda";
 import Vote from "@pickems/core/database/vote";
 import Game from "@pickems/core/database/game";
 import AWS from "aws-sdk";
-import { Item, TeamKey, teams } from "@pickems/core/types";
+import { Item, TeamKey } from "@pickems/core/types";
+import { teams } from "@pickems/core/teams";
 const lambda = new AWS.Lambda();
 
 export const main = async (event: SQSEvent) => {

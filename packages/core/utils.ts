@@ -1,13 +1,13 @@
 import {
-  CreateGame,
   CreateSelectMenu,
   Item,
   TeamKey,
-  teams,
   Event,
+  Reply,
+  Dropdown,
 } from "./types";
+import { teams } from "./teams";
 import AWS from "aws-sdk";
-import Game from "../core/database/game";
 import { Queue } from "sst/node/queue";
 import { Config } from "sst/node/config";
 import fetch from "node-fetch";
@@ -93,46 +93,6 @@ export const extractGameId = (str: string) =>
   (str.match(/\$vote\/(.*?)#/) || [])[1];
 export const extractPickId = (str: string) => (str.match(/#(.*)$/) || [])[1];
 
-export const createGameInDB = async (rd: string, blu: string) =>
-  (
-    await Game.create({
-      red_side: { team_name: rd },
-      blue_side: { team_name: blu },
-    })
-  ).data.game_id;
-
-export const createGame = async (body: CreateGame) => {
-  const { options } = body.data;
-  const blu = options.find((s) => s.name === "blue_side");
-  const rd = options.find((s) => s.name === "red_side");
-  if (!blu || !rd) {
-    return { content: "Could not create game, missing teams" };
-  }
-  if (blu.value === rd.value) {
-    return { content: "Teams cannot play themselves" };
-  }
-  const game_id = await createGameInDB(rd.value, blu.value);
-
-  const opts = options.map((t) => ({
-    type: 2,
-    style: 2,
-    label: teams[t.value],
-    custom_id: `$vote/${game_id}#${t.name}`,
-  }));
-
-  const components = [
-    {
-      type: 1,
-      components: opts,
-    },
-  ];
-
-  return {
-    content: `Match: ${teams[blu.value]} vs ${teams[rd.value]}`,
-    components,
-  };
-};
-
 export const sendToVotesQueue = async (item: Item) => {
   const params: AWS.SQS.SendMessageRequest = {
     QueueUrl: Queue.VotesQueue.queueUrl,
@@ -164,32 +124,6 @@ export const authenticate = (event: Event, nacl: any): Boolean => {
     Buffer.from(Config.PUBLIC_KEY, "hex")
   );
 };
-
-interface DropdownOption {
-  label: string;
-  value: string;
-}
-
-interface Component {
-  type: number;
-  custom_id: string;
-  options: DropdownOption[];
-  placeholder: string;
-}
-
-interface DropdownItem {
-  type: number;
-  components: Component[];
-}
-
-type Dropdown = DropdownItem[];
-
-interface Reply {
-  title: string;
-  id: string;
-  token: string;
-  components?: Dropdown;
-}
 
 export const reply = async ({ title, id, token, components }: Reply) => {
   const url = `https://discord.com/api/v10/webhooks/${id}/${token}/messages/@original`;

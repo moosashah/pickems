@@ -3,17 +3,9 @@ import { InteractionResponseType, InteractionType } from "discord-interactions";
 import AWS from "aws-sdk";
 import { Function } from "sst/node/function";
 import Game from "@pickems/core/database/game";
-import {
-  CreateGame,
-  Item,
-  ParsedBody,
-  TeamKey,
-  teams,
-} from "@pickems/core/types";
+import { Item, ParsedBody } from "@pickems/core/types";
 import {
   authenticate,
-  createGame,
-  createPointsSelectMenu,
   extractGameId,
   extractPickId,
   sendToVotesQueue,
@@ -52,11 +44,17 @@ export const main = async (event: APIGatewayEvent) => {
     }
 
     if (data.name === "create-game") {
-      if (!data.options) {
-        return JSON.stringify({ type: 4, content: "No options" });
-      }
-      const str = await createGame(body as CreateGame);
-      return JSON.stringify({ type: 4, data: str });
+      lambda
+        .invoke({
+          FunctionName: Function.CreateGame.functionName,
+          InvocationType: "Event",
+          Payload: JSON.stringify(body),
+        })
+        .promise();
+      return JSON.stringify({
+        type: 4,
+        data: { content: "Creating game..." },
+      });
     }
 
     if (data.name === "close-voting") {
@@ -201,41 +199,41 @@ export const main = async (event: APIGatewayEvent) => {
     }
 
     if (data.custom_id === "award-points-selection") {
-      if (!data.values) {
-        return JSON.stringify({
-          type: 4,
-          data: { content: "No game found...", flags: 64 },
-        });
-      }
-
-      const [gameId, pickId] = data.values[0].split("#");
-      const game = await Game.getGame(gameId);
-      lambda
-        .invoke({
-          FunctionName: Function.AwardPoints.functionName,
-          InvocationType: "Event",
-          Payload: JSON.stringify({ game_id: gameId, pick_id: pickId }),
-        })
-        .promise();
-      if (!game.data) {
-        return JSON.stringify({
-          type: 4,
-          data: { content: "No game found...", flags: 64 },
-        });
-      }
-
-      const teamName =
-        teams[
-          game.data[pickId as "red_side" | "blue_side"].team_name as TeamKey
-        ];
-      await Game.pointsAwarded(gameId);
-
-      return JSON.stringify({
-        type: 4,
-        data: {
-          content: `Awarding...  Winner: ${teamName}`,
-        },
-      });
+      // if (!data.values) {
+      //   return JSON.stringify({
+      //     type: 4,
+      //     data: { content: "No game found...", flags: 64 },
+      //   });
+      // }
+      //
+      // const [gameId, pickId] = data.values[0].split("#");
+      // const game = await Game.getGame(gameId);
+      // lambda
+      //   .invoke({
+      //     FunctionName: Function.AwardPoints.functionName,
+      //     InvocationType: "Event",
+      //     Payload: JSON.stringify({ game_id: gameId, pick_id: pickId }),
+      //   })
+      //   .promise();
+      // if (!game.data) {
+      //   return JSON.stringify({
+      //     type: 4,
+      //     data: { content: "No game found...", flags: 64 },
+      //   });
+      // }
+      //
+      // const teamName =
+      //   teams[
+      //     game.data[pickId as "red_side" | "blue_side"].team_name as TeamKey
+      //   ];
+      // await Game.pointsAwarded(gameId);
+      //
+      // return JSON.stringify({
+      //   type: 4,
+      //   data: {
+      //     content: `Awarding...  Winner: ${teamName}`,
+      //   },
+      // });
     }
 
     return JSON.stringify({
