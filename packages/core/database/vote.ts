@@ -27,6 +27,10 @@ const VoteEntity = new Entity(
         type: "boolean",
         default: false,
       },
+      user_name: {
+        type: "string",
+        required: true,
+      },
     },
     indexes: {
       primary: {

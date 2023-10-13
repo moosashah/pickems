@@ -1,7 +1,6 @@
 import { Queue } from "sst/node/queue";
 import AWS from "aws-sdk";
 import Vote from "@pickems/core/database/vote";
-import { APIGatewayEvent } from "aws-lambda";
 const sqs = new AWS.SQS();
 
 const togglePointsAwarded = async (
@@ -9,6 +8,7 @@ const togglePointsAwarded = async (
     user_id: string;
     game_id: string;
     pick_id: string;
+    user_name: string;
   }[]
 ) => {
   const updatedVotes = votes.map((vote) => ({ ...vote, points_awarded: true }));
@@ -18,6 +18,7 @@ const togglePointsAwarded = async (
 const sendToPointsQueue = async (
   votes: {
     user_id: string;
+    user_name: string;
     game_id: string;
     pick_id: string;
   }[]
@@ -26,8 +27,8 @@ const sendToPointsQueue = async (
     const i = {
       Id: index.toString(),
       MessageBody: JSON.stringify(item),
-      MessageGroupId: item.user_id,
-      MessageDeduplicationId: item.user_id,
+      MessageGroupId: `${item.user_id}${item.game_id}`,
+      MessageDeduplicationId: `${item.user_id}${item.game_id}`,
     };
     return i;
   });

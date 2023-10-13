@@ -41,10 +41,15 @@ export const main = async (event: funcBody) => {
   if (!points) {
     return await reply("You have no points", event.appId, event.token);
   } else {
-    return await reply(
-      `You are rank: ${points.ranking} with ${points.score} points`,
-      event.appId,
-      event.token
-    );
+    let str: string;
+    if (!points.ranking) {
+      str = `You have ${points.score} points, error getting rank`;
+    } else {
+      str = `You are rank: ${parseInt(points.ranking).toString()} with ${
+        points.score
+      } ${(points.score as number) > 1 ? "points" : "point"}`;
+    }
+
+    return await reply(str, event.appId, event.token);
   }
 };

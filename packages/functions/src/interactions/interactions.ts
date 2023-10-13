@@ -34,6 +34,8 @@ export const main = async (event: APIGatewayEvent) => {
     };
   }
 
+  console.log({ body });
+
   if (type === InteractionType.PING) {
     return {
       statusCode: 200,
@@ -169,7 +171,7 @@ export const main = async (event: APIGatewayEvent) => {
         appId: body.application_id,
         token: body.token,
         userId: body.member.user.id,
-        userName: body.member.user.username,
+        userName: body.member.user.global_name,
         pickId,
         gameId,
       };
