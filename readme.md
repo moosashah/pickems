@@ -43,7 +43,6 @@ intitially it was going to be a golang server but since its a lot of votes withi
   "type": 1,
   "name": "create-game",
   "description": "Create pickems game",
-  "guild_id": "1159155607287369834",
   "options": [
     {
       "type": 3,
