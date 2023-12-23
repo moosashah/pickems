@@ -19,8 +19,7 @@ const getUsersPoints = async (keys: Key[]) => {
 
 const batchUpdatePoints = async (records: UsersRes[]) => {
   const keys = records.map((r) => ({
-    user_id: r.user_id,
-    user_name: r.user_name,
+    ...r,
     score: (r.score || 0) + 1,
   }));
   return await User.batchWrite(keys);

@@ -287,6 +287,20 @@ intitially it was going to be a golang server but since its a lot of votes withi
 ```
 
 
-
-
 [RGD]: https://discord.com/developers/docs/interactions/application-commands#registering-a-command
+
+
+
+# Notes
+
+Made for cadreal.
+Made using serverless to handle high load and using http endpoints instead of websockets that discordjs or golang equivalent use.
+
+Interaction needs response within 3 seconds otherwise the interaction fails. Cold starts are really problematic because of this. Maybe need to rewrite and use a single lambda so that all interaction logic goes through a lambda that stays active.
+
+Need to add tests, will help refactor code into better units
+
+ElectroDB super useful when working with dynamoDB
+
+DynamoDB migrations triggered on a "scrap" function.
+Since dynamo is so cheap, its better to just run scans and delete all records intead of 
